@@ -85,11 +85,7 @@
     *{ box-sizing:border-box }
     html,body{ margin:0; height:100% }
     body{
-      background:
-        linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.3) 100%),
-        radial-gradient(1200px 800px at 70% -10%, rgba(124,58,237,.16), transparent 60%),
-        radial-gradient(1000px 600px at 10% 110%, rgba(16,185,129,.13), transparent 60%),
-        var(--bg);
+      background: var(--bg);
       color:var(--fg);
       font:16px/1.5 ui-rounded, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Apple Color Emoji, Segoe UI Emoji, sans-serif;
       -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
@@ -107,21 +103,6 @@
       position: relative;
     }
     
-    /* Enhanced gradient overlay for better text readability */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: 
-        linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.4) 100%),
-        linear-gradient(90deg, rgba(0,0,0,0.3) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.3) 100%);
-      pointer-events: none;
-      z-index: var(--z-base);
-    }
-
     .wrap{
       height:100%;
       display:grid;
@@ -461,17 +442,24 @@
       50% { filter: saturate(.7) brightness(.85); }
     }
 
-    #particleCanvas{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      z-index:1;
-      /* Hardware acceleration */
-      -webkit-transform: translateZ(0);
-      transform: translateZ(0);
-      will-change: transform;
+    .canvas-container {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
     }
+
+    .canvas-container canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    #backgroundCanvas { z-index: 1; }
+    #tireMarkCanvas { z-index: 2; }
+    #mainCanvas { z-index: 4; }
+
 
     .drifter{
       position:absolute;
@@ -483,7 +471,7 @@
       pointer-events:none;
       user-select:none;
       filter: drop-shadow(0 10px 24px rgba(0,0,0,.35));
-      z-index:2;
+      z-index:3;
       opacity:.95;
       /* Hardware acceleration */
       -webkit-transform: translate3d(-1000px,-1000px,0) rotate(0deg);
@@ -498,7 +486,7 @@
       font-size:110px;
       filter:drop-shadow(0 6px 18px rgba(0,0,0,.3));
       opacity:0;
-      z-index:3;
+      z-index:5;
       pointer-events:none;
       /* Hardware acceleration */
       -webkit-transform: translate3d(-50%,-50%,0) scale(.2);
@@ -513,7 +501,7 @@
       opacity:0;
       pointer-events:none;
       transition:opacity .2s ease;
-      z-index:4
+      z-index:6;
     }
 
     .smirk.show{ animation:smirkIn .6s cubic-bezier(.2,.9,.2,1) forwards }
@@ -679,7 +667,11 @@
   </div>
 
   <main class="play" id="play" aria-label="Play field" tabindex="0">
-    <canvas id="particleCanvas"></canvas>
+    <div class="canvas-container">
+      <canvas id="backgroundCanvas"></canvas>
+      <canvas id="tireMarkCanvas"></canvas>
+      <canvas id="mainCanvas"></canvas>
+    </div>
     <img id="drifter" class="drifter" src="drift.png" alt="" />
     <div class="smirk" id="smirk" aria-hidden="true">😝</div>
     <div class="flash" id="flash"></div>
@@ -701,12 +693,19 @@
   const flash = document.getElementById('flash');
   const drifter = document.getElementById('drifter');
   const sfxKeko = document.getElementById('sfxKeko');
-  const canvas = document.getElementById('particleCanvas');
-  const ctx = canvas.getContext('2d');
   const srHelp = document.getElementById('srHelp');
   const loading = document.getElementById('loading');
   const loadingProgress = document.getElementById('loadingProgress');
   const loadingText = document.getElementById('loadingText');
+
+  // Canvas setup
+  const bgCanvas = document.getElementById('backgroundCanvas');
+  const tireMarkCanvas = document.getElementById('tireMarkCanvas');
+  const mainCanvas = document.getElementById('mainCanvas');
+  const bgCtx = bgCanvas.getContext('2d');
+  const tireMarkCtx = tireMarkCanvas.getContext('2d');
+  const mainCtx = mainCanvas.getContext('2d');
+  const canvases = [bgCanvas, tireMarkCanvas, mainCanvas];
 
   // Debug: Check if all elements are found
   console.log('DOM Elements check:', {
@@ -717,13 +716,12 @@
     flash: !!flash,
     drifter: !!drifter,
     sfxKeko: !!sfxKeko,
-    canvas: !!canvas,
-    ctx: !!ctx,
+    canvases: canvases.every(c => !!c),
     srHelp: !!srHelp,
     loading: !!loading
   });
 
-  if (!wrap || !startBtn || !play || !canvas || !loading) {
+  if (!wrap || !startBtn || !play || canvases.some(c => !c) || !loading) {
     console.error('Critical DOM elements missing!');
     document.body.innerHTML = '<div style="padding: 20px; color: red;">Error: Critical elements not found. Please refresh the page.</div>';
     return;
@@ -749,31 +747,35 @@
     carHeightPx = carWidthPx * ratio;
   }
 
-  function resizeCanvas() {
-    const rect = canvas.getBoundingClientRect();
+  function resizeAllCanvases() {
+    const rect = play.getBoundingClientRect();
     dpr = window.devicePixelRatio || 1;
-    canvas.width  = Math.max(1, Math.floor(rect.width  * dpr));
-    canvas.height = Math.max(1, Math.floor(rect.height * dpr));
     viewW = rect.width;
     viewH = rect.height;
-    ctx.setTransform(1,0,0,1,0,0);
-    ctx.scale(dpr, dpr);
+    
+    canvases.forEach(canvas => {
+      const ctx = canvas.getContext('2d');
+      canvas.width  = Math.max(1, Math.floor(rect.width  * dpr));
+      canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+      ctx.setTransform(1,0,0,1,0,0);
+      ctx.scale(dpr, dpr);
+    });
+    
     updateCarMetrics();
-  }
-  function clearCanvas() {
-    ctx.setTransform(1,0,0,1,0,0);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.setTransform(dpr,0,0,dpr,0,0);
+    initStars(); // Re-initialize stars for new size
   }
 
   // Global state
-  let particles = [];
+  let activeParticles = [];
+  let particlePool = [];
   let lastTime = 0;
   let pressing = false;
   let pressTimer = null;
   let lastTrail = 0;
   let paused = false;
   let autoPaused = false;
+  let stars = [];
+  let lastTirePoints = { left: null, right: null };
 
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches || forceRM;
 
@@ -1056,18 +1058,24 @@
   }
 
   function addParticle(props) {
-    const defaults = { life:1, vx:0, vy:0, rot:0, vrot:0, scale:1, opacity:1, update:null, render:null };
+    let p = particlePool.pop();
+    if (!p) {
+      p = {};
+    }
     
+    const defaults = { life:1, vx:0, vy:0, rot:0, vrot:0, scale:1, opacity:1, update:null, render:null, active: true };
+    Object.assign(p, defaults, props);
+
     // Check if this is a smoke particle and limit smoke count
-    if (props.render === renderSmoke) {
-      const smokeCount = particles.filter(p => p.render === renderSmoke).length;
+    if (p.render === renderSmoke) {
+      const smokeCount = activeParticles.filter(part => part.active && part.render === renderSmoke).length;
       if (smokeCount >= MAX_SMOKE_PARTICLES) {
-        return; // Don't add more smoke particles
+        particlePool.push(p); // Return to pool if limit is reached
+        return;
       }
     }
     
-    particles.push({ ...defaults, ...props });
-    if (particles.length > maxParticles) particles.splice(0, particles.length - maxParticles);
+    activeParticles.push(p);
   }
 
   function chooseToken(){
@@ -1199,6 +1207,17 @@
     if(token.type==='keko') playSfx('keko');
     if(token.type==='keko') spawnParrots(x,y);
   }
+  
+  function triggerScreenShake(duration = 280) {
+    if (prefersReduced) {
+      flash.classList.add('show');
+      setTimeout(() => flash.classList.remove('show'), duration / 2);
+    } else {
+      play.classList.add('shake');
+      setTimeout(() => play.classList.remove('shake'), duration);
+    }
+  }
+
   function chaos(){
     let t = 0;
     const maxBursts = quality.heavy ? 8 : 6;
@@ -1208,8 +1227,7 @@
       randomEffect(rx, ry);
       if(++t>=maxBursts) clearInterval(spam);
     }, 160);
-    if(!prefersReduced){ play.classList.add('shake'); setTimeout(()=>play.classList.remove('shake'), 280); }
-    else { flash.classList.add('show'); setTimeout(()=>flash.classList.remove('show'), 200); }
+    triggerScreenShake();
     haptic();
   }
 
@@ -1289,61 +1307,81 @@
     car.x += wx*dt; car.y += wy*dt; car.theta += car.rYaw*dt;
 
     const m = 40;
+    let wallHit = false;
     if(car.x < m || car.x > viewW - m){
       car.x = Math.max(m, Math.min(viewW - m, car.x));
       const nx = car.x < viewW*0.5 ? 1 : -1;
       const rwx = -wx*0.6, rwy = wy;
       car.u = rwx*ct + rwy*st; car.v = -rwx*st + rwy*ct; car.rYaw += 1.0*nx;
+      wallHit = true;
     }
     if(car.y < m || car.y > viewH - m){
       car.y = Math.max(m, Math.min(viewH - m, car.y));
       const ny = car.y < viewH*0.5 ? 1 : -1;
       const rwx = wx, rwy = -wy*0.6;
       car.u = rwx*ct + rwy*st; car.v = -rwx*st + rwy*ct; car.rYaw -= 0.8*ny;
+      wallHit = true;
     }
+    if (wallHit) triggerScreenShake(150);
 
-    // Smoke system
+    // Smoke and Tire Marks
     if(!prefersReduced){
       const slip = Math.abs(ar);
-      // Generate smoke if slipping or e-braking
       if(slip > 0.35 || ts < car.ebrakeUntil){
+        // Tire mark points
+        const rearAxleOffset = -carWidthPx * 0.45;
+        const tireOffset = carWidthPx * 0.3;
+        const localLeft = { x: rearAxleOffset, y: -tireOffset };
+        const localRight = { x: rearAxleOffset, y: tireOffset };
+
+        const worldLeft = {
+          x: car.x + localLeft.x * ct - localLeft.y * st,
+          y: car.y + localLeft.x * st + localLeft.y * ct
+        };
+        const worldRight = {
+          x: car.x + localRight.x * ct - localRight.y * st,
+          y: car.y + localRight.x * st + localRight.y * ct
+        };
+
+        if (lastTirePoints.left) {
+          tireMarkCtx.strokeStyle = 'rgba(255,255,255,0.04)';
+          tireMarkCtx.lineWidth = 2;
+          tireMarkCtx.beginPath();
+          tireMarkCtx.moveTo(lastTirePoints.left.x, lastTirePoints.left.y);
+          tireMarkCtx.lineTo(worldLeft.x, worldLeft.y);
+          tireMarkCtx.stroke();
+
+          tireMarkCtx.beginPath();
+          tireMarkCtx.moveTo(lastTirePoints.right.x, lastTirePoints.right.y);
+          tireMarkCtx.lineTo(worldRight.x, worldRight.y);
+          tireMarkCtx.stroke();
+        }
+        lastTirePoints.left = worldLeft;
+        lastTirePoints.right = worldRight;
+
+        // Smoke
         const strong = slip > 0.6;
         const veryStrong = slip > 0.8;
-        
         const baseCount = strong ? (veryStrong ? 2 : 1) : 1;
         const count = Math.floor(baseCount * quality.density);
+        const smokeOrigin = driftImageSide === 'right' ? worldRight : worldLeft;
         
-        // Define local coordinates of the smoking tire relative to car's center
-        const localX = -carWidthPx * 0.45; // Distance back from center (tuned for visual)
-        const localY = (driftImageSide === 'right' ? 1 : -1) * carWidthPx * 0.3; // Distance sideways from center (tuned for visual)
-
-        // Rotate local point to get world coordinates using standard 2D rotation
-        const smokeOriginX = car.x + (localX * ct) - (localY * st);
-        const smokeOriginY = car.y + (localX * st) + (localY * ct);
-        
-        // Calculate world-space velocity of the rear axle
         const rearAxleVelX = wx - st * car.b * car.rYaw;
         const rearAxleVelY = wy + ct * car.b * car.rYaw;
         
         for (let i = 0; i < count; i++) {
           const spriteIndex = Math.floor(Math.random() * smokeSprites.length);
           const baseSize = strong ? (veryStrong ? rand(24, 38) : rand(20, 30)) : rand(16, 24);
-          
-          // Smoke velocity is opposite to the rear axle's ground velocity
           const baseSmokeVx = -rearAxleVelX;
           const baseSmokeVy = -rearAxleVelY;
-          
-          // Add random spread and scaling
           const speedScale = rand(0.1, 0.3);
           const angle = rand(-0.5, 0.5);
-          const c = Math.cos(angle);
-          const s = Math.sin(angle);
-
+          const c = Math.cos(angle), s = Math.sin(angle);
           const vx = (baseSmokeVx * c - baseSmokeVy * s) * speedScale;
           const vy = (baseSmokeVx * s + baseSmokeVy * c) * speedScale;
           
           addParticle({
-            x: smokeOriginX, y: smokeOriginY,
+            x: smokeOrigin.x, y: smokeOrigin.y,
             vx, vy,
             size: baseSize, life: rand(1.4, 2.2), opacity: rand(0.3, 0.6),
             rot: rand(0, Math.PI*2), vrot: rand(-1.5, 1.5),
@@ -1352,13 +1390,11 @@
             update: function(p, dt) {
               const airResistance = 0.98;
               const buoyancy = -10;
-              
               p.vx *= airResistance;
               p.vy = (p.vy + buoyancy * dt) * airResistance;
               p.x += p.vx * dt;
               p.y += p.vy * dt;
               p.rot += p.vrot * dt;
-              
               p.life -= dt * 0.8;
               p.opacity = p.life * 0.7;
               p.scale = 1 + (1 - p.life) * 1.2;
@@ -1367,12 +1403,16 @@
             render: renderSmoke
           });
         }
+      } else {
+        lastTirePoints.left = null;
+        lastTirePoints.right = null;
       }
     }
 
     // Push nearby particles using squared distance
     const R = 110, R2 = R*R;
-    for (const p of particles) {
+    for (const p of activeParticles) {
+      if (!p.active) continue;
       const dx = p.x - car.x, dy = p.y - car.y;
       const d2 = dx*dx + dy*dy;
       if (d2 < R2) {
@@ -1389,31 +1429,62 @@
 
   let emaDt = 1/60;
   let lastAdapt = 0;
-  let performanceMetrics = {
-    fps: 60,
-    particleCount: 0,
-    memoryUsage: 0
-  };
   
+  function initStars() {
+    stars = [];
+    for (let i = 0; i < 100; i++) {
+      stars.push({
+        x: Math.random() * viewW,
+        y: Math.random() * viewH,
+        size: Math.random() * 1.5 + 0.5,
+        opacity: Math.random() * 0.5 + 0.2
+      });
+    }
+  }
+
+  function drawBackground(dt) {
+    bgCtx.clearRect(0, 0, viewW, viewH);
+    bgCtx.fillStyle = '#0b0d12';
+    bgCtx.fillRect(0,0,viewW,viewH);
+
+    // Update and draw stars
+    const speed = Math.sqrt(car.u * car.u + car.v * car.v);
+    const parallax = speed * dt * 0.05;
+
+    stars.forEach(star => {
+      star.x -= parallax;
+      if (star.x < 0) star.x += viewW;
+      
+      bgCtx.beginPath();
+      bgCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+      bgCtx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+      bgCtx.fill();
+    });
+  }
+
   function mainLoop(ts) {
     const dt = lastTime ? Math.min(0.05, (ts - lastTime) / 1000) : 0;
     lastTime = ts;
 
-    clearCanvas();
-
     if (!paused) {
       stepCar(dt, ts);
 
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
+      // Fade tire marks
+      tireMarkCtx.fillStyle = 'rgba(11, 13, 18, 0.02)';
+      tireMarkCtx.fillRect(0, 0, viewW, viewH);
+
+      // Update particles
+      for (let i = activeParticles.length - 1; i >= 0; i--) {
+        const p = activeParticles[i];
         if (p.update) p.update(p, dt);
-        if (p.life <= 0) particles.splice(i, 1);
+        if (p.life <= 0) {
+          p.active = false;
+          particlePool.push(p);
+          activeParticles.splice(i, 1);
+        }
       }
 
       emaDt = emaDt * 0.9 + dt * 0.1;
-      const fps = 1 / Math.max(emaDt, 1e-6);
-      performanceMetrics.fps = fps;
-      performanceMetrics.particleCount = particles.length;
       
       if (ts - lastAdapt > 1200) {
         adjustParticleDensity();
@@ -1421,17 +1492,21 @@
       }
     }
 
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    for (const p of particles) {
+    // Drawing
+    drawBackground(dt);
+    
+    mainCtx.clearRect(0, 0, viewW, viewH);
+    mainCtx.textAlign = 'center';
+    mainCtx.textBaseline = 'middle';
+    for (const p of activeParticles) {
       if (!p.render) continue;
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.rot);
-      ctx.scale(p.scale, p.scale);
-      ctx.globalAlpha = p.opacity;
-      p.render(p, ctx);
-      ctx.restore();
+      mainCtx.save();
+      mainCtx.translate(p.x, p.y);
+      mainCtx.rotate(p.rot);
+      mainCtx.scale(p.scale, p.scale);
+      mainCtx.globalAlpha = p.opacity;
+      p.render(p, mainCtx);
+      mainCtx.restore();
     }
 
     requestAnimationFrame(mainLoop);
@@ -1445,7 +1520,14 @@
   }
 
   function resetScene(){
-    particles.length = 0;
+    activeParticles.forEach(p => {
+      p.active = false;
+      particlePool.push(p);
+    });
+    activeParticles.length = 0;
+    tireMarkCtx.clearRect(0,0,viewW,viewH);
+    lastTirePoints = { left: null, right: null };
+
     // Select a new random drift image for each reset
     selectRandomDriftImage();
     initCar(performance.now());
@@ -1471,7 +1553,7 @@
         setTimeout(() => {
           play.classList.add('visible');
           
-          resizeCanvas();
+          resizeAllCanvases();
           unlockAudio();
           initCar(performance.now());
           
@@ -1503,7 +1585,7 @@
     }
   }
 
-  window.addEventListener('resize', resizeCanvas, { passive:true });
+  window.addEventListener('resize', resizeAllCanvases, { passive:true });
   document.addEventListener('visibilitychange', ()=>{
     if(document.hidden){
       if(!paused){ autoPaused = true; setPaused(true); }
@@ -1569,7 +1651,7 @@
 
   play.addEventListener('pointerdown', e=>{
     pressing = true;
-    const rect = canvas.getBoundingClientRect();
+    const rect = mainCanvas.getBoundingClientRect();
     const x = e.clientX - rect.left, y = e.clientY - rect.top;
     
     // Enhanced visual feedback
@@ -1616,7 +1698,7 @@
   play.addEventListener('pointermove', e=>{
     if(!pressing) return;
     const now = performance.now(); if(now - lastTrail < 50) return; lastTrail = now;
-    const rect = canvas.getBoundingClientRect();
+    const rect = mainCanvas.getBoundingClientRect();
     const x = e.clientX - rect.left, y = e.clientY - rect.top;
     const chs = ['✦','✧','•']; const ch = chs[(Math.random()*chs.length)|0];
     addParticle({ x, y, size: 14, color: pickColor(), text: ch, life: 1, initialLife: 1, duration: 700, scale: 0, update: updatePop, render: renderText });
