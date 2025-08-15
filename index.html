@@ -427,16 +427,71 @@
       margin: var(--spacing-sm) 0;
     }
 
+    /* Enhanced Mobile Responsiveness */
     @media (max-width: 768px) {
       .smirk { font-size: 80px; }
-      /* Make drifter image 50% bigger on mobile */
       .drifter {
-        width: min(57vw, 630px); /* 38vw * 1.5 = 57vw, 420px * 1.5 = 630px */
+        width: min(57vw, 630px);
+      }
+      .wrap {
+        padding: var(--spacing-md);
+      }
+      .hybrid-base {
+        min-height: 60px;
+        width: 180px;
+        padding: 18px 36px;
+        font-size: 17px;
+      }
+      .hybrid-merge-1 {
+        width: 120px;
+        height: 120px;
       }
     }
 
     @media (max-width: 480px) {
       .smirk { font-size: 60px; }
+      .wrap {
+        padding: var(--spacing-sm);
+      }
+      .hybrid-base {
+        min-height: 56px;
+        width: 160px;
+        padding: 16px 32px;
+        font-size: 16px;
+      }
+      .hybrid-merge-1 {
+        width: 100px;
+        height: 100px;
+      }
+    }
+
+    /* Orientation Handling */
+    @media (orientation: landscape) and (max-height: 500px) {
+      .wrap {
+        padding: var(--spacing-sm);
+      }
+      .hybrid-base {
+        min-height: 50px;
+        padding: 14px 28px;
+        font-size: 15px;
+      }
+      .smirk {
+        font-size: 50px;
+      }
+    }
+
+    /* Touch Target Accessibility */
+    .hybrid-base {
+      min-height: 44px; /* Minimum touch target size */
+      touch-action: manipulation;
+    }
+
+    /* High DPI Display Support */
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+      .drifter {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+      }
     }
     
     @media (prefers-reduced-motion: reduce) {
@@ -466,6 +521,44 @@
         width: 200px; 
         height: 200px; 
         opacity: 0;
+      }
+    }
+
+    @keyframes pinchFeedback {
+      0% { 
+        opacity: 0; 
+        transform: translate(-50%, -50%) scale(0.5);
+      }
+      50% { 
+        opacity: 1; 
+        transform: translate(-50%, -50%) scale(1.2);
+      }
+      100% { 
+        opacity: 0; 
+        transform: translate(-50%, -50%) scale(1) translateY(-20px);
+      }
+    }
+
+    /* Enhanced Visual Effects */
+    .enhanced-feedback {
+      position: absolute;
+      pointer-events: none;
+      z-index: var(--z-tooltip);
+      animation: enhancedFeedback 0.6s ease-out forwards;
+    }
+
+    @keyframes enhancedFeedback {
+      0% { 
+        opacity: 0; 
+        transform: scale(0.3) rotate(0deg);
+      }
+      50% { 
+        opacity: 1; 
+        transform: scale(1.1) rotate(180deg);
+      }
+      100% { 
+        opacity: 0; 
+        transform: scale(1) rotate(360deg) translateY(-30px);
       }
     }
   </style>
@@ -597,18 +690,26 @@
     viewH = rect.height;
     
     canvases.forEach(canvas => {
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d', {
+        alpha: true,
+        antialias: false,
+        willReadFrequently: false
+      });
       canvas.width  = Math.max(1, Math.floor(rect.width  * dpr));
       canvas.height = Math.max(1, Math.floor(rect.height * dpr));
       ctx.setTransform(1,0,0,1,0,0);
       ctx.scale(dpr, dpr);
+      
+      // Optimize context settings
+      ctx.imageSmoothingEnabled = false; // Disable for better performance
+      ctx.globalCompositeOperation = 'source-over';
     });
     
     updateCarMetrics();
     initStars(); // Re-initialize stars for new size
   }
 
-  // Global state
+  // Enhanced Global State with Memory Management
   let activeParticles = [];
   let particlePool = [];
   let lastTime = 0;
@@ -619,6 +720,72 @@
   let autoPaused = false;
   let stars = [];
   let lastTirePoints = { left: null, right: null };
+  
+  // Memory management and performance tracking
+  let frameCount = 0;
+  let lastFPS = 0;
+  let memoryUsage = 0;
+  let particleCreationCount = 0;
+  let particleReuseCount = 0;
+  
+  // Enhanced particle pool with object recycling
+  const PARTICLE_POOL_SIZE = 500;
+  const MAX_ACTIVE_PARTICLES = 300;
+  
+  // Initialize particle pool
+  function initializeParticlePool() {
+    for (let i = 0; i < PARTICLE_POOL_SIZE; i++) {
+      particlePool.push(createParticleObject());
+    }
+    console.log(`Initialized particle pool with ${PARTICLE_POOL_SIZE} objects`);
+  }
+  
+  // Create reusable particle object
+  function createParticleObject() {
+    return {
+      x: 0, y: 0, vx: 0, vy: 0, rot: 0, vrot: 0, scale: 1, opacity: 1,
+      life: 0, initialLife: 0, duration: 0, size: 0, color: '#ffffff',
+      text: '', src: null, spriteIndex: 0, initialSize: 0,
+      update: null, render: null, active: false,
+      // Add metadata for debugging
+      createdAt: 0, lastUsed: 0, useCount: 0
+    };
+  }
+  
+  // Memory cleanup function
+  function cleanupMemory() {
+    const now = performance.now();
+    const maxAge = 30000; // 30 seconds
+    
+    // Clean up old particles
+    for (let i = activeParticles.length - 1; i >= 0; i--) {
+      const p = activeParticles[i];
+      if (p.life <= 0 || (now - p.createdAt > maxAge)) {
+        p.active = false;
+        p.useCount++;
+        p.lastUsed = now;
+        particlePool.push(p);
+        activeParticles.splice(i, 1);
+      }
+    }
+    
+    // Limit active particles to prevent memory issues
+    if (activeParticles.length > MAX_ACTIVE_PARTICLES) {
+      const excess = activeParticles.length - MAX_ACTIVE_PARTICLES;
+      for (let i = 0; i < excess; i++) {
+        const p = activeParticles.shift();
+        p.active = false;
+        p.useCount++;
+        p.lastUsed = now;
+        particlePool.push(p);
+      }
+    }
+    
+    // Log memory usage periodically
+    if (frameCount % 300 === 0) { // Every 5 seconds at 60fps
+      console.log(`Memory Status: Active: ${activeParticles.length}, Pool: ${particlePool.length}, Reuse Rate: ${((particleReuseCount / (particleCreationCount + particleReuseCount)) * 100).toFixed(1)}%`);
+    }
+  }
 
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches || forceRM;
 
@@ -901,36 +1068,47 @@
   }
 
   function addParticle(props) {
-    let p = particlePool.pop();
-    if (!p) {
-      p = {};
-    }
-    
-    const defaults = { life:1, vx:0, vy:0, rot:0, vrot:0, scale:1, opacity:1, update:null, render:null, active: true };
-    Object.assign(p, defaults, props);
-
-    // Check if this is a smoke particle and limit smoke count
-    if (p.render === renderSmoke) {
+    // Check smoke particle limits first
+    if (props.render === renderSmoke) {
       const smokeCount = activeParticles.filter(part => part.active && part.render === renderSmoke).length;
       if (smokeCount >= MAX_SMOKE_PARTICLES) {
-        particlePool.push(p); // Return to pool if limit is reached
-        // Debug: Log when smoke limit is reached
-        if (Math.random() < 0.1) { // 10% chance to log
+        if (Math.random() < 0.05) { // 5% chance to log
           console.log('Smoke particle limit reached:', smokeCount, '>=', MAX_SMOKE_PARTICLES);
         }
         return;
       }
     }
     
+    // Get particle from pool or create new one
+    let p = particlePool.pop();
+    if (!p) {
+      p = createParticleObject();
+      particleCreationCount++;
+    } else {
+      particleReuseCount++;
+    }
+    
+    // Reset particle properties
+    p.x = 0; p.y = 0; p.vx = 0; p.vy = 0; p.rot = 0; p.vrot = 0;
+    p.scale = 1; p.opacity = 1; p.life = 1; p.initialLife = 1;
+    p.duration = 0; p.size = 0; p.color = '#ffffff'; p.text = '';
+    p.src = null; p.spriteIndex = 0; p.initialSize = 0;
+    p.update = null; p.render = null; p.active = true;
+    
+    // Set new properties
+    Object.assign(p, props);
+    
+    // Add metadata
+    p.createdAt = performance.now();
+    p.lastUsed = performance.now();
+    
     activeParticles.push(p);
     
-    // Debug: Log smoke particle creation
-    if (props.render === renderSmoke && Math.random() < 0.05) { // 5% chance to log
+    // Debug logging for smoke particles
+    if (props.render === renderSmoke && Math.random() < 0.02) { // 2% chance to log
       console.log('Smoke particle added:', {
-        x: props.x,
-        y: props.y,
-        size: props.size,
-        life: props.life
+        x: props.x, y: props.y, size: props.size, life: props.life,
+        poolSize: particlePool.length, activeCount: activeParticles.length
       });
     }
   }
@@ -1377,8 +1555,59 @@
     drifter.style.transform = `translate(${car.x - carWidthPx/2}px, ${car.y - carHeightPx/2 + car.bodyRoll * 10}px) rotate(${car.theta + car.bodyRoll * 0.2}rad)`;
   }
 
+  // Enhanced Performance Management
   let emaDt = 1/60;
   let lastAdapt = 0;
+  let targetFPS = 60;
+  let currentFPS = 60;
+  let frameTimeHistory = [];
+  let lastFrameTime = 0;
+  
+  // Adaptive frame rate control
+  function updateFrameRate(ts) {
+    if (lastFrameTime > 0) {
+      const frameTime = ts - lastFrameTime;
+      frameTimeHistory.push(frameTime);
+      
+      // Keep only last 60 frames for averaging
+      if (frameTimeHistory.length > 60) {
+        frameTimeHistory.shift();
+      }
+      
+      // Calculate current FPS
+      const avgFrameTime = frameTimeHistory.reduce((a, b) => a + b, 0) / frameTimeHistory.length;
+      currentFPS = 1000 / avgFrameTime;
+      
+      // Adjust target FPS based on performance
+      if (currentFPS < 45 && targetFPS > 30) {
+        targetFPS = Math.max(30, targetFPS - 5);
+        console.log(`Performance drop detected. Reducing target FPS to ${targetFPS}`);
+      } else if (currentFPS > 58 && targetFPS < 60) {
+        targetFPS = Math.min(60, targetFPS + 2);
+      }
+    }
+    lastFrameTime = ts;
+  }
+  
+  // Canvas optimization
+  function optimizeCanvasContexts() {
+    // Enable hardware acceleration hints
+    canvases.forEach(canvas => {
+      const ctx = canvas.getContext('2d', {
+        alpha: true,
+        antialias: false, // Disable for better performance
+        willReadFrequently: false // Hint that we won't read pixel data
+      });
+      
+      // Set composite operation for better blending
+      ctx.globalCompositeOperation = 'source-over';
+      
+      // Optimize text rendering
+      ctx.textRenderingOptimization = 'optimizeSpeed';
+    });
+    
+    console.log('Canvas contexts optimized for performance');
+  }
   
   function initStars() {
     stars = [];
@@ -1413,6 +1642,10 @@
   }
 
   function mainLoop(ts) {
+    // Update frame rate tracking
+    updateFrameRate(ts);
+    frameCount++;
+    
     const dt = lastTime ? Math.min(0.05, (ts - lastTime) / 1000) : 0;
     lastTime = ts;
 
@@ -1423,12 +1656,14 @@
       tireMarkCtx.fillStyle = 'rgba(11, 13, 18, 0.02)';
       tireMarkCtx.fillRect(0, 0, viewW, viewH);
 
-      // Update particles
+      // Update particles with enhanced memory management
       for (let i = activeParticles.length - 1; i >= 0; i--) {
         const p = activeParticles[i];
         if (p.update) p.update(p, dt);
         if (p.life <= 0) {
           p.active = false;
+          p.lastUsed = ts;
+          p.useCount++;
           particlePool.push(p);
           activeParticles.splice(i, 1);
         }
@@ -1440,15 +1675,32 @@
         adjustParticleDensity();
         lastAdapt = ts;
       }
+      
+      // Memory cleanup every 60 frames (1 second at 60fps)
+      if (frameCount % 60 === 0) {
+        cleanupMemory();
+      }
+      
+      // Update performance overlay every 30 frames
+      if (frameCount % 30 === 0) {
+        updatePerformanceOverlay();
+      }
     }
 
-    // Drawing
+    // Drawing with performance optimization
     drawBackground(dt);
     
     mainCtx.clearRect(0, 0, viewW, viewH);
     mainCtx.textAlign = 'center';
     mainCtx.textBaseline = 'middle';
-    for (const p of activeParticles) {
+    
+    // Batch render particles for better performance
+    const visibleParticles = activeParticles.filter(p => 
+      p.x >= -p.size && p.x <= viewW + p.size && 
+      p.y >= -p.size && p.y <= viewH + p.size
+    );
+    
+    for (const p of visibleParticles) {
       if (!p.render) continue;
       mainCtx.save();
       mainCtx.translate(p.x, p.y);
@@ -1459,7 +1711,15 @@
       mainCtx.restore();
     }
 
-    requestAnimationFrame(mainLoop);
+    // Adaptive frame rate control
+    const frameDelay = 1000 / targetFPS;
+    const elapsed = ts - lastFrameTime;
+    
+    if (elapsed >= frameDelay) {
+      requestAnimationFrame(mainLoop);
+    } else {
+      setTimeout(() => requestAnimationFrame(mainLoop), frameDelay - elapsed);
+    }
   }
 
   function setPaused(flag){
@@ -1503,6 +1763,10 @@
         setTimeout(() => {
           play.classList.add('visible');
           
+          // Initialize enhanced systems
+          initializeParticlePool();
+          optimizeCanvasContexts();
+          createPerformanceOverlay();
           resizeAllCanvases();
           unlockAudio();
           initCar(performance.now());
@@ -1517,7 +1781,7 @@
           setTimeout(()=>confettiColumns(), 520);
           
           lastTime = performance.now();
-          announce('التحكم: Enter أو مسافة للتأثير. P إيقاف/استئناف. M كتم. R إعادة تعيين. I تبديل الصورة. S اختبار الدخان.');
+          announce('التحكم: Enter أو مسافة للتأثير. P إيقاف/استئناف. M كتم. R إعادة تعيين. I تبديل الصورة. S اختبار الدخان. Pinch to zoom on mobile.');
           requestAnimationFrame(mainLoop);
           play.focus();
         }, 50); // Short delay to ensure display:block is registered before transition
@@ -1575,6 +1839,50 @@
       updateLoadingProgress(progress, `جاري التحميل... ${Math.round(progress)}%`);
     }, 100);
   }
+
+  // Performance monitoring overlay
+  function createPerformanceOverlay() {
+    const overlay = document.createElement('div');
+    overlay.id = 'performanceOverlay';
+    overlay.style.cssText = `
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 12px;
+      z-index: 1000;
+      display: none;
+    `;
+    
+    document.body.appendChild(overlay);
+    
+    // Toggle with 'P' key (when not paused)
+    document.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'p' && e.ctrlKey) {
+        overlay.style.display = overlay.style.display === 'none' ? 'block' : 'none';
+      }
+    });
+    
+    return overlay;
+  }
+
+  // Update performance overlay
+  function updatePerformanceOverlay() {
+    const overlay = document.getElementById('performanceOverlay');
+    if (overlay && overlay.style.display !== 'none') {
+      overlay.innerHTML = `
+        FPS: ${Math.round(currentFPS)}<br>
+        Target: ${targetFPS}<br>
+        Particles: ${activeParticles.length}<br>
+        Pool: ${particlePool.length}<br>
+        Memory: ${Math.round(memoryUsage)}MB
+      `;
+    }
+  }
   
   // Initialize the interface
   initializeInterface();
@@ -1599,8 +1907,20 @@
     }
   }, 5000);
 
+  // Enhanced Touch Controls and Gesture Recognition
+  let touchStartTime = 0;
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchStartDistance = 0;
+  let isMultiTouch = false;
+  let lastPinchDistance = 0;
+
   play.addEventListener('pointerdown', e=>{
     pressing = true;
+    touchStartTime = performance.now();
+    touchStartX = e.clientX;
+    touchStartY = e.clientY;
+    
     const rect = mainCanvas.getBoundingClientRect();
     const x = e.clientX - rect.left, y = e.clientY - rect.top;
     
@@ -1611,13 +1931,65 @@
     // Create ripple effect
     createRippleEffect(x, y);
     
-    // Enhanced haptic feedback
+    // Enhanced haptic feedback with different patterns
     if (navigator.vibrate) {
-      navigator.vibrate([30, 20, 30]);
+      const pattern = e.pointerType === 'touch' ? [20, 15, 25] : [30, 20, 30];
+      navigator.vibrate(pattern);
     }
     
     pressTimer = setTimeout(()=>{ chaos(); }, 500);
   }, { passive:true });
+
+  // Multi-touch gesture support
+  play.addEventListener('touchstart', e => {
+    if (e.touches.length === 2) {
+      isMultiTouch = true;
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      touchStartDistance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) + 
+        Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+      lastPinchDistance = touchStartDistance;
+    }
+  }, { passive: true });
+
+  play.addEventListener('touchmove', e => {
+    if (isMultiTouch && e.touches.length === 2) {
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const currentDistance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) + 
+        Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+      
+      // Pinch to zoom effect (affects particle density)
+      const pinchDelta = currentDistance - lastPinchDistance;
+      if (Math.abs(pinchDelta) > 20) {
+        if (pinchDelta > 0) {
+          // Zoom in - increase particle density
+          quality.density = Math.min(1.0, quality.density * 1.1);
+          maxParticles = Math.min(BASE_MAX, Math.floor(maxParticles * 1.05));
+        } else {
+          // Zoom out - decrease particle density
+          quality.density = Math.max(0.3, quality.density * 0.9);
+          maxParticles = Math.max(50, Math.floor(maxParticles * 0.95));
+        }
+        lastPinchDistance = currentDistance;
+        
+        // Visual feedback for pinch gesture
+        const centerX = (touch1.clientX + touch2.clientX) / 2;
+        const centerY = (touch1.clientY + touch2.clientY) / 2;
+        createPinchFeedback(centerX, centerY, pinchDelta > 0 ? 'zoom-in' : 'zoom-out');
+      }
+    }
+  }, { passive: true });
+
+  play.addEventListener('touchend', e => {
+    if (e.touches.length < 2) {
+      isMultiTouch = false;
+    }
+  }, { passive: true });
   
   // Enhanced ripple effect for interactions
   function createRippleEffect(x, y) {
@@ -1645,6 +2017,66 @@
     }, 600);
   }
 
+  // Pinch gesture feedback
+  function createPinchFeedback(x, y, type) {
+    const feedback = document.createElement('div');
+    feedback.style.cssText = `
+      position: absolute;
+      left: ${x}px;
+      top: ${y}px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: var(--z-tooltip);
+      font-size: 24px;
+      color: ${type === 'zoom-in' ? '#10b981' : '#f59e0b'};
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      animation: pinchFeedback 0.8s ease-out forwards;
+    `;
+    feedback.textContent = type === 'zoom-in' ? '🔍+' : '🔍-';
+    
+    play.appendChild(feedback);
+    
+    setTimeout(() => {
+      if (feedback.parentNode) {
+        feedback.parentNode.removeChild(feedback);
+      }
+    }, 800);
+  }
+
+  // Enhanced visual feedback system
+  function createEnhancedFeedback(x, y, type, intensity = 1) {
+    // Particle burst
+    const particleCount = Math.floor(8 * intensity);
+    for (let i = 0; i < particleCount; i++) {
+      const angle = (i / particleCount) * Math.PI * 2;
+      const speed = 60 + Math.random() * 40;
+      const vx = Math.cos(angle) * speed;
+      const vy = Math.sin(angle) * speed;
+      
+      addParticle({
+        x: x + Math.random() * 20 - 10,
+        y: y + Math.random() * 20 - 10,
+        vx, vy,
+        size: rand(8, 16),
+        color: type === 'success' ? '#10b981' : type === 'warning' ? '#f59e0b' : pickColor(),
+        life: rand(0.8, 1.5),
+        update: updateBounce,
+        render: (p, ctx) => {
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(0, 0, p.size/2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+    }
+    
+    // Screen flash effect
+    if (intensity > 0.7) {
+      flash.classList.add('show');
+      setTimeout(() => flash.classList.remove('show'), 100);
+    }
+  }
+
   play.addEventListener('pointermove', e=>{
     if(!pressing) return;
     const now = performance.now(); if(now - lastTrail < 50) return; lastTrail = now;
@@ -1661,27 +2093,27 @@
     const k = e.key.toLowerCase();
     if(k==='enter' || k===' '){
       randomEffect(viewW/2, viewH/2);
-      createInteractionFeedback();
+      createEnhancedFeedback(viewW/2, viewH/2, 'success', 0.8);
       e.preventDefault();
     } else if(k==='p'){
       setPaused(!paused); 
-      createInteractionFeedback();
+      createEnhancedFeedback(viewW/2, viewH/2, paused ? 'warning' : 'success', 0.6);
       e.preventDefault();
     } else if(k==='m'){
       audio.muted = !audio.muted;
       if (bgMusic) { bgMusic.muted = audio.muted; }
       announce(audio.muted ? 'تم كتم الصوت.' : 'تم تشغيل الصوت.');
-      createInteractionFeedback();
+      createEnhancedFeedback(viewW/2, viewH/2, audio.muted ? 'warning' : 'success', 0.7);
       e.preventDefault();
     } else if(k==='r'){
       resetScene(); 
-      createInteractionFeedback();
+      createEnhancedFeedback(viewW/2, viewH/2, 'success', 1.0);
       e.preventDefault();
     } else if(k==='i'){
       // Manual image switch for testing
       selectRandomDriftImage();
       announce(`Switched to ${currentDriftImage} (smoke from ${driftImageSide})`);
-      createInteractionFeedback();
+      createEnhancedFeedback(viewW/2, viewH/2, 'info', 0.5);
       e.preventDefault();
     } else if(k==='s'){
       // Manual smoke test
@@ -1779,7 +2211,7 @@
         });
       }
       announce('Manual smoke test triggered');
-      createInteractionFeedback();
+      createEnhancedFeedback(testX, testY, 'success', 0.9);
       e.preventDefault();
     }
   });
