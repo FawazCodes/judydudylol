@@ -68,6 +68,11 @@
       --z-overlay: 10;
       --z-modal: 100;
       --z-tooltip: 200;
+
+      /* Button Specific Vars */
+      --glass-bg: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --transition-smooth: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
     @media (prefers-color-scheme: light){
       :root{
@@ -217,88 +222,213 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-
-    .start{
-      position:relative;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:.5rem;
-      min-height: var(--touch-target);
-      min-width: var(--touch-target);
-      padding:18px 28px;
-      font-weight:900;
-      font-size:20px;
-      border-radius:999px;
-      cursor:pointer;
-      background:linear-gradient(135deg,var(--a),var(--b));
-      color:#fff;
-      border:0;
-      box-shadow:var(--shadow);
-      -webkit-tap-highlight-color:transparent;
-      transition: all var(--transition-fast);
-      /* iOS optimizations */
-      -webkit-transform: translateZ(0);
-      transform: translateZ(0);
-      will-change: transform;
-      overflow: hidden;
-      position: relative;
-    }
     
-    .start::before {
+    /* Hybrid Ultra Design */
+    .start-hybrid {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 70px;
+      min-width: 220px;
+      padding: 22px 44px;
+      font-weight: 800;
+      font-size: 19px;
+      letter-spacing: 0.5px;
+      border-radius: 20px;
+      cursor: pointer;
+      border: 1.5px solid var(--glass-border);
+      
+      /* Glassmorphism Foundation */
+      background: 
+        linear-gradient(135deg, 
+          rgba(255, 255, 255, 0.15) 0%,
+          rgba(255, 255, 255, 0.05) 100%);
+      backdrop-filter: blur(20px) saturate(1.8);
+      -webkit-backdrop-filter: blur(20px) saturate(1.8);
+      
+      /* Advanced Multi-Layer Gradient */
+      background-image: 
+        /* Top glass reflection */
+        linear-gradient(135deg, 
+          rgba(255, 255, 255, 0.3) 0%, 
+          transparent 30%, 
+          transparent 70%, 
+          rgba(255, 255, 255, 0.1) 100%),
+        /* Core holographic gradient */
+        conic-gradient(from 45deg at 50% 50%,
+          rgba(124, 58, 237, 0.4) 0deg,
+          rgba(16, 185, 129, 0.4) 72deg,
+          rgba(245, 158, 11, 0.4) 144deg,
+          rgba(6, 182, 212, 0.4) 216deg,
+          rgba(225, 29, 72, 0.4) 288deg,
+          rgba(124, 58, 237, 0.4) 360deg),
+        /* Base depth gradient */
+        radial-gradient(ellipse at center,
+          rgba(124, 58, 237, 0.2) 0%,
+          rgba(16, 185, 129, 0.15) 50%,
+          transparent 100%);
+      
+      color: #fff;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      
+      /* Neumorphic 3D Shadows */
+      box-shadow: 
+        /* Outer neumorphic shadows */
+        12px 12px 24px rgba(0, 0, 0, 0.4),
+        -8px -8px 16px rgba(255, 255, 255, 0.02),
+        /* Inner glow */
+        inset 0 1px 2px rgba(255, 255, 255, 0.2),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.2),
+        /* Outer holographic glow */
+        0 0 30px rgba(124, 58, 237, 0.2),
+        0 0 60px rgba(16, 185, 129, 0.1);
+      
+      transition: all var(--transition-smooth);
+      transform-style: preserve-3d;
+      transform: translateZ(0) rotateX(0deg) rotateY(0deg);
+      will-change: transform, box-shadow, background;
+      overflow: hidden;
+      animation: subtleFloat 6s ease-in-out infinite;
+    }
+
+    /* Animated gradient background layer */
+    .start-hybrid::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 22px;
+      padding: 2px;
+      background: 
+        conic-gradient(from 0deg,
+          var(--a) 0deg,
+          var(--b) 60deg,
+          var(--c) 120deg,
+          var(--d) 180deg,
+          var(--e) 240deg,
+          var(--a) 300deg,
+          var(--b) 360deg);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: xor;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      opacity: 0;
+      animation: gradientRotate 8s linear infinite paused;
+      transition: opacity var(--transition-smooth);
+      z-index: -1;
+    }
+
+    /* Shimmer effect overlay */
+    .start-hybrid::after {
       content: '';
       position: absolute;
       top: 0;
-      left: -100%;
-      width: 100%;
+      left: -120%;
+      width: 120%;
       height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left var(--transition-slow);
+      background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.3) 30%,
+        rgba(255, 255, 255, 0.5) 50%,
+        rgba(255, 255, 255, 0.3) 70%,
+        transparent 100%);
+      transform: skewX(-20deg);
+      transition: left 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      z-index: 1;
+      pointer-events: none;
     }
 
-    .start:hover {
-      transform: translateY(-3px) scale(1.02);
-      box-shadow: var(--shadow-xl);
-    }
-    
-    .start:hover::before {
-      left: 100%;
+    /* Hover State - Ultimate Transformation */
+    .start-hybrid:hover {
+      transform: 
+        translateZ(0) 
+        rotateX(-8deg) 
+        rotateY(5deg) 
+        translateY(-4px) 
+        scale(1.03);
+      
+      border-color: rgba(124, 58, 237, 0.4);
+      
+      /* Enhanced shadows and glows */
+      box-shadow: 
+        /* Deeper neumorphic shadows */
+        16px 16px 32px rgba(0, 0, 0, 0.5),
+        -12px -12px 24px rgba(255, 255, 255, 0.03),
+        /* Stronger inner lighting */
+        inset 0 2px 4px rgba(255, 255, 255, 0.3),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+        /* Amplified holographic aura */
+        0 0 40px rgba(124, 58, 237, 0.4),
+        0 0 80px rgba(16, 185, 129, 0.2),
+        0 0 120px rgba(245, 158, 11, 0.1);
+      
+      /* Enhanced backdrop blur */
+      backdrop-filter: blur(25px) saturate(2.2);
+      -webkit-backdrop-filter: blur(25px) saturate(2.2);
     }
 
-    .start:active{
-      transform:translateY(1px) scale(0.98);
-      box-shadow:var(--shadow-md);
+    .start-hybrid:hover::before {
+      opacity: 0.8;
+      animation-play-state: running;
     }
 
-    .start:focus {
-      outline: 3px solid var(--a);
-      outline-offset: 2px;
-      box-shadow: var(--shadow-lg), 0 0 0 3px rgba(124,58,237,0.3);
-    }
-    
-    .start:focus-visible {
-      outline: 3px solid var(--a);
-      outline-offset: 2px;
+    .start-hybrid:hover::after {
+      left: 120%;
     }
 
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
+    /* Active/Press State */
+    .start-hybrid:active {
+      transform: 
+        translateZ(0) 
+        rotateX(-3deg) 
+        rotateY(2deg) 
+        translateY(-1px) 
+        scale(0.97);
+      
+      transition: all 0.1s ease-out;
+      
+      box-shadow: 
+        /* Pressed neumorphic state */
+        inset 8px 8px 16px rgba(0, 0, 0, 0.4),
+        inset -4px -4px 8px rgba(255, 255, 255, 0.02),
+        /* Compressed glow */
+        0 0 20px rgba(124, 58, 237, 0.3);
     }
-    
-    @keyframes entrance {
-      0% { 
-        opacity: 0; 
-        transform: translateY(20px) scale(0.9);
+
+    /* Focus state for accessibility */
+    .start-hybrid:focus-visible {
+      outline: none;
+      box-shadow: 
+        12px 12px 24px rgba(0, 0, 0, 0.4),
+        -8px -8px 16px rgba(255, 255, 255, 0.02),
+        inset 0 1px 2px rgba(255, 255, 255, 0.2),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.2),
+        0 0 30px rgba(124, 58, 237, 0.2),
+        0 0 60px rgba(16, 185, 129, 0.1),
+        /* Focus ring */
+        0 0 0 3px rgba(124, 58, 237, 0.5);
+    }
+
+    /* Gradient rotation animation */
+    @keyframes gradientRotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Subtle idle animation */
+    @keyframes subtleFloat {
+      0%, 100% { 
+        transform: translateZ(0) rotateX(0deg) rotateY(0deg) translateY(0px);
       }
-      100% { 
-        opacity: 1; 
-        transform: translateY(0) scale(1);
+      25% { 
+        transform: translateZ(0) rotateX(1deg) rotateY(-0.5deg) translateY(-2px);
       }
-    }
-
-    .start { 
-      animation: entrance 0.6s ease-out, pulse 2s ease-in-out infinite 0.6s; 
+      50% { 
+        transform: translateZ(0) rotateX(-0.5deg) rotateY(1deg) translateY(-1px);
+      }
+      75% { 
+        transform: translateZ(0) rotateX(0.5deg) rotateY(0.5deg) translateY(-2px);
+      }
     }
 
     .play{
@@ -460,7 +590,16 @@
     }
 
     @media (max-width: 768px) {
-      .start { font-size: 18px; padding: 16px 24px; }
+      .start-hybrid {
+        min-width: 200px;
+        min-height: 64px;
+        padding: 20px 40px;
+        font-size: 17px;
+        border-radius: 18px;
+      }
+      .start-hybrid::before {
+        border-radius: 20px;
+      }
       .smirk { font-size: 80px; }
       /* Make drifter image 50% bigger on mobile */
       .drifter {
@@ -469,8 +608,36 @@
     }
 
     @media (max-width: 480px) {
-      .start { font-size: 16px; padding: 14px 20px; }
+      .start-hybrid {
+        min-width: 180px;
+        min-height: 58px;
+        padding: 18px 36px;
+        font-size: 16px;
+        border-radius: 16px;
+      }
+      .start-hybrid::before {
+        border-radius: 18px;
+      }
       .smirk { font-size: 60px; }
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      .start-hybrid {
+        animation: none;
+        transition: all 0.2s ease;
+      }
+      .start-hybrid::before {
+        animation: none;
+      }
+      .start-hybrid::after {
+        transition: none;
+      }
+      .start-hybrid:hover {
+        transform: translateY(-2px) scale(1.02);
+      }
+      .start-hybrid:active {
+        transform: translateY(0) scale(0.98);
+      }
     }
 
     .sr-only{
@@ -508,7 +675,7 @@
 
   <div class="wrap" id="wrap">
     <div class="skeleton-loading skeleton-button" id="skeletonButton"></div>
-    <button class="start" id="startBtn" aria-label="Start" tabindex="0" role="button" style="display: none;">اضغط هنا</button>
+    <button class="start-hybrid" id="startBtn" aria-label="Start" tabindex="0" role="button" style="display: none;">اضغط هنا</button>
   </div>
 
   <main class="play" id="play" aria-label="Play field" tabindex="0">
@@ -1289,47 +1456,41 @@
 
   function startShow(){
     try {
-      // Enhanced loading sequence with progress
+      // Immediately hide the wrap to prevent button from persisting
+      wrap.classList.add('hidden');
+      
+      // Show a brief loading confirmation before transitioning
+      loading.classList.remove('hidden');
       updateLoadingProgress(100, 'تم التحميل!');
       
       setTimeout(() => {
         loading.classList.add('hidden');
         
-        // Smooth transition to wrap
-        wrap.classList.add('entering');
+        // Show play area with smooth transition
+        play.style.display = 'block';
         setTimeout(() => {
-          wrap.classList.remove('entering');
-        }, 800);
-        
-        // Hide wrap with animation
-        setTimeout(() => {
-          wrap.classList.add('hidden');
+          play.classList.add('visible');
           
-          // Show play area with smooth transition
-          setTimeout(() => {
-            play.style.display = 'block';
-            play.classList.add('visible');
-            
-            resizeCanvas();
-            unlockAudio();
-            initCar(performance.now());
-            
-            // Staggered animations for better visual flow
-            smirk.classList.add('show'); 
-            setTimeout(()=> smirk.classList.remove('show'), 700);
-            
-            curtainDrop();
-            setTimeout(()=>randomEffect(viewW/2, viewH/2), 140);
-            setTimeout(()=>emojiGeyser(), 300);
-            setTimeout(()=>confettiColumns(), 520);
-            
-            lastTime = performance.now();
-            announce('التحكم: Enter أو مسافة للتأثير. P إيقاف/استئناف. M كتم. R إعادة تعيين. I تبديل الصورة.');
-            requestAnimationFrame(mainLoop);
-            play.focus();
-          }, 300);
-        }, 400);
-      }, 500);
+          resizeCanvas();
+          unlockAudio();
+          initCar(performance.now());
+          
+          // Staggered animations for better visual flow
+          smirk.classList.add('show'); 
+          setTimeout(()=> smirk.classList.remove('show'), 700);
+          
+          curtainDrop();
+          setTimeout(()=>randomEffect(viewW/2, viewH/2), 140);
+          setTimeout(()=>emojiGeyser(), 300);
+          setTimeout(()=>confettiColumns(), 520);
+          
+          lastTime = performance.now();
+          announce('التحكم: Enter أو مسافة للتأثير. P إيقاف/استئناف. M كتم. R إعادة تعيين. I تبديل الصورة.');
+          requestAnimationFrame(mainLoop);
+          play.focus();
+        }, 50); // Short delay to ensure display:block is registered before transition
+        
+      }, 300);
       
     } catch (error) {
       console.error('Error in startShow function:', error);
