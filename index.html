@@ -1282,6 +1282,76 @@
             },
             render: renderSmoke
           });
+          
+          // Add "وييييي" text particles that spawn from smoke
+          if (Math.random() < 0.3) { // 30% chance to spawn text with each smoke particle
+            const textParticle = {
+              x: smokeOrigin.x + rand(-20, 20),
+              y: smokeOrigin.y + rand(-20, 20),
+              vx: rand(-80, 80),
+              vy: rand(-120, -60),
+              size: rand(16, 32),
+              color: pickColor(),
+              text: 'وييييي',
+              life: rand(1.5, 2.5),
+              rot: rand(-0.5, 0.5),
+              vrot: rand(-2, 2),
+              scale: 1,
+              opacity: rand(0.7, 1.0),
+              update: function(p, dt) {
+                // Physics update for text particles
+                const gravity = 200;
+                const airResistance = 0.98;
+                
+                p.vy += gravity * dt;
+                p.vx *= airResistance;
+                p.vy *= airResistance;
+                
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+                p.rot += p.vrot * dt;
+                
+                // Life and visual effects
+                p.life -= dt * 0.6;
+                p.opacity = p.life * 0.8;
+                p.scale = 1 + (1 - p.life) * 0.5;
+                
+                // Bounce off ground
+                if (p.y > viewH - p.size/2) {
+                  p.y = viewH - p.size/2;
+                  p.vy *= -0.6;
+                  p.vx *= 0.8;
+                }
+                
+                // Bounce off walls
+                if (p.x < p.size/2) {
+                  p.x = p.size/2;
+                  p.vx *= -0.7;
+                }
+                if (p.x > viewW - p.size/2) {
+                  p.x = viewW - p.size/2;
+                  p.vx *= -0.7;
+                }
+              },
+              render: function(p, ctx) {
+                ctx.save();
+                ctx.globalAlpha = p.opacity;
+                ctx.fillStyle = p.color;
+                ctx.font = `bold ${p.size * p.scale}px ui-rounded, system-ui, sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(p.text, 0, 0);
+                
+                // Add glow effect
+                ctx.shadowColor = p.color;
+                ctx.shadowBlur = 8;
+                ctx.fillText(p.text, 0, 0);
+                ctx.restore();
+              }
+            };
+            
+            addParticle(textParticle);
+          }
         }
       } else {
         lastTirePoints.left = null;
@@ -1640,6 +1710,72 @@
             p.size = p.initialSize * p.scale;
           },
           render: renderSmoke
+        });
+        
+        // Also add "وييييي" text particles for manual test
+        addParticle({
+          x: testX + Math.random() * 30 - 15,
+          y: testY + Math.random() * 30 - 15,
+          vx: rand(-100, 100),
+          vy: rand(-150, -80),
+          size: rand(20, 36),
+          color: pickColor(),
+          text: 'وييييي',
+          life: rand(2.0, 3.0),
+          rot: rand(-0.8, 0.8),
+          vrot: rand(-3, 3),
+          scale: 1,
+          opacity: rand(0.8, 1.0),
+          update: function(p, dt) {
+            // Physics update for text particles
+            const gravity = 200;
+            const airResistance = 0.98;
+            
+            p.vy += gravity * dt;
+            p.vx *= airResistance;
+            p.vy *= airResistance;
+            
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.rot += p.vrot * dt;
+            
+            // Life and visual effects
+            p.life -= dt * 0.5;
+            p.opacity = p.life * 0.8;
+            p.scale = 1 + (1 - p.life) * 0.5;
+            
+            // Bounce off ground
+            if (p.y > viewH - p.size/2) {
+              p.y = viewH - p.size/2;
+              p.vy *= -0.6;
+              p.vx *= 0.8;
+            }
+            
+            // Bounce off walls
+            if (p.x < p.size/2) {
+              p.x = p.size/2;
+              p.vx *= -0.7;
+            }
+            if (p.x > viewW - p.size/2) {
+              p.x = viewW - p.size/2;
+              p.vx *= -0.7;
+            }
+          },
+          render: function(p, ctx) {
+            ctx.save();
+            ctx.globalAlpha = p.opacity;
+            ctx.fillStyle = p.color;
+            ctx.font = `bold ${p.size * p.scale}px ui-rounded, system-ui, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(p.text, 0, 0);
+            
+            // Add glow effect
+            ctx.shadowColor = p.color;
+            ctx.shadowBlur = 8;
+            ctx.fillText(p.text, 0, 0);
+            ctx.restore();
+          }
         });
       }
       announce('Manual smoke test triggered');
