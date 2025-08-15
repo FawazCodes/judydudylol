@@ -1,0 +1,1540 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="format-detection" content="telephone=no" />
+  <title>Judy</title>
+
+  <!-- Favicons -->
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="mask-icon" href="safari-pinned-tab.svg" color="#7c3aed">
+  <meta name="theme-color" content="#0b0d12" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f6f7fb" media="(prefers-color-scheme: light)">
+
+  <!-- Preload critical assets with priority -->
+  <link rel="preload" href="drift.png" as="image" type="image/png" fetchpriority="high">
+  <link rel="preload" href="drift2.png" as="image" type="image/png" fetchpriority="high">
+  <link rel="preload" href="keko.mp3" as="audio" type="audio/mpeg">
+  <link rel="preload" href="falafel.mp3" as="audio" type="audio/mpeg">
+  
+  <!-- Preload drift images with multiple formats for better performance -->
+  <link rel="preload" href="drift.png" as="image" type="image/png" media="(min-width: 768px)">
+  <link rel="preload" href="drift2.png" as="image" type="image/png" media="(min-width: 768px)">
+  <link rel="preload" href="drift.png" as="image" type="image/png" media="(max-width: 767px)">
+  <link rel="preload" href="drift2.png" as="image" type="image/png" media="(max-width: 767px)">
+
+  <style>
+    :root{
+      --bg:#0b0d12; --fg:#e5e7eb; --muted:#94a3b8;
+      --a:#7c3aed; --b:#10b981; --c:#f59e0b; --d:#06b6d4; --e:#e11d48; --f:#a3e635;
+      --touch-target: 44px;
+      --border-radius: 12px;
+      --shadow: 0 10px 30px rgba(0,0,0,.25);
+      --shadow-lg: 0 20px 40px rgba(0,0,0,.3);
+      
+      /* Enhanced Design System */
+      --shadow-sm: 0 2px 8px rgba(0,0,0,.15);
+      --shadow-md: 0 8px 25px rgba(0,0,0,.2);
+      --shadow-xl: 0 25px 50px rgba(0,0,0,.35);
+      --shadow-inner: inset 0 2px 4px rgba(0,0,0,.1);
+      
+      /* Semantic Colors */
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #e11d48;
+      --info: #06b6d4;
+      
+      /* Enhanced Spacing */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      
+      /* Transitions */
+      --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      /* Z-index layers */
+      --z-base: 1;
+      --z-overlay: 10;
+      --z-modal: 100;
+      --z-tooltip: 200;
+    }
+    @media (prefers-color-scheme: light){
+      :root{
+        --bg:#f6f7fb; --fg:#0b0d12; --muted:#475569;
+        --shadow: 0 10px 30px rgba(0,0,0,.15);
+        --shadow-lg: 0 20px 40px rgba(0,0,0,.2);
+      }
+    }
+
+    *{ box-sizing:border-box }
+    html,body{ margin:0; height:100% }
+    body{
+      background:
+        linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.3) 100%),
+        radial-gradient(1200px 800px at 70% -10%, rgba(124,58,237,.16), transparent 60%),
+        radial-gradient(1000px 600px at 10% 110%, rgba(16,185,129,.13), transparent 60%),
+        var(--bg);
+      color:var(--fg);
+      font:16px/1.5 ui-rounded, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Apple Color Emoji, Segoe UI Emoji, sans-serif;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      touch-action:manipulation; user-select:none;
+      overflow: hidden;
+      /* iOS optimizations */
+      -webkit-overflow-scrolling: touch;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      position: relative;
+    }
+    
+    /* Enhanced gradient overlay for better text readability */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.4) 100%),
+        linear-gradient(90deg, rgba(0,0,0,0.3) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.3) 100%);
+      pointer-events: none;
+      z-index: var(--z-base);
+    }
+
+    .wrap{
+      height:100%;
+      display:grid;
+      place-items:center;
+      padding:var(--spacing-lg);
+      position: relative;
+      z-index: var(--z-overlay);
+      transition: all var(--transition-slow);
+      opacity: 1;
+      transform: scale(1);
+    }
+    
+    .wrap.hidden {
+      opacity: 0;
+      transform: scale(0.95);
+      pointer-events: none;
+    }
+    
+    .wrap.entering {
+      animation: wrapEntrance 0.8s ease-out;
+    }
+    
+    @keyframes wrapEntrance {
+      0% { 
+        opacity: 0; 
+        transform: scale(0.8) translateY(30px);
+      }
+      100% { 
+        opacity: 1; 
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-md);
+      z-index: var(--z-overlay);
+      transition: all var(--transition-normal);
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(10px);
+      padding: var(--spacing-xl);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-xl);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .loading.hidden {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.9);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(124,58,237,0.2);
+      border-top: 4px solid var(--a);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .loading-progress {
+      width: 200px;
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .loading-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--a), var(--b));
+      border-radius: 3px;
+      width: 0%;
+      transition: width var(--transition-normal);
+      box-shadow: 0 0 10px rgba(124,58,237,0.5);
+    }
+    
+    .loading-text {
+      color: var(--fg);
+      font-weight: 600;
+      font-size: 14px;
+      text-align: center;
+      opacity: 0.8;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .start{
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:.5rem;
+      min-height: var(--touch-target);
+      min-width: var(--touch-target);
+      padding:18px 28px;
+      font-weight:900;
+      font-size:20px;
+      border-radius:999px;
+      cursor:pointer;
+      background:linear-gradient(135deg,var(--a),var(--b));
+      color:#fff;
+      border:0;
+      box-shadow:var(--shadow);
+      -webkit-tap-highlight-color:transparent;
+      transition: all var(--transition-fast);
+      /* iOS optimizations */
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+      will-change: transform;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .start::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left var(--transition-slow);
+    }
+
+    .start:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: var(--shadow-xl);
+    }
+    
+    .start:hover::before {
+      left: 100%;
+    }
+
+    .start:active{
+      transform:translateY(1px) scale(0.98);
+      box-shadow:var(--shadow-md);
+    }
+
+    .start:focus {
+      outline: 3px solid var(--a);
+      outline-offset: 2px;
+      box-shadow: var(--shadow-lg), 0 0 0 3px rgba(124,58,237,0.3);
+    }
+    
+    .start:focus-visible {
+      outline: 3px solid var(--a);
+      outline-offset: 2px;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    @keyframes entrance {
+      0% { 
+        opacity: 0; 
+        transform: translateY(20px) scale(0.9);
+      }
+      100% { 
+        opacity: 1; 
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .start { 
+      animation: entrance 0.6s ease-out, pulse 2s ease-in-out infinite 0.6s; 
+    }
+
+    .play{
+      position:fixed;
+      inset:0;
+      display:none;
+      overflow:hidden;
+      backface-visibility:hidden;
+      /* Hardware acceleration */
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+      will-change: transform;
+      opacity: 0;
+      transform: scale(1.05);
+      transition: all var(--transition-slow);
+    }
+    
+    .play.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .play.paused{ 
+      filter:saturate(.8) brightness(.9);
+      animation: pausePulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pausePulse {
+      0%, 100% { filter: saturate(.8) brightness(.9); }
+      50% { filter: saturate(.7) brightness(.85); }
+    }
+
+    #particleCanvas{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      z-index:1;
+      /* Hardware acceleration */
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+      will-change: transform;
+    }
+
+    .drifter{
+      position:absolute;
+      left:0;
+      top:0;
+      width:min(38vw, 420px);
+      transform:translate(-1000px,-1000px) rotate(0deg);
+      will-change:transform;
+      pointer-events:none;
+      user-select:none;
+      filter: drop-shadow(0 10px 24px rgba(0,0,0,.35));
+      z-index:2;
+      opacity:.95;
+      /* Hardware acceleration */
+      -webkit-transform: translate3d(-1000px,-1000px,0) rotate(0deg);
+      transform: translate3d(-1000px,-1000px,0) rotate(0deg);
+    }
+
+    .smirk{
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%) scale(.2);
+      font-size:110px;
+      filter:drop-shadow(0 6px 18px rgba(0,0,0,.3));
+      opacity:0;
+      z-index:3;
+      pointer-events:none;
+      /* Hardware acceleration */
+      -webkit-transform: translate3d(-50%,-50%,0) scale(.2);
+      transform: translate3d(-50%,-50%,0) scale(.2);
+      will-change: transform;
+    }
+
+    .flash{
+      position:absolute;
+      inset:0;
+      background:linear-gradient(180deg, rgba(255,255,255,.15), transparent);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .2s ease;
+      z-index:4
+    }
+
+    .smirk.show{ animation:smirkIn .6s cubic-bezier(.2,.9,.2,1) forwards }
+
+    @keyframes smirkIn{
+      to{
+        -webkit-transform:translate3d(-50%,-50%,0) scale(1);
+        transform:translate3d(-50%,-50%,0) scale(1);
+        opacity:1
+      }
+    }
+
+    .flash.show{ opacity:1 }
+
+    .shake{ animation:shake .28s linear 1 }
+
+    @keyframes shake{
+      0%,100%{ -webkit-transform:translate3d(0,0,0); transform:translate3d(0,0,0) }
+      25%{ -webkit-transform:translate3d(2px,-2px,0); transform:translate3d(2px,-2px,0) }
+      50%{ -webkit-transform:translate3d(-2px,2px,0); transform:translate3d(-2px,2px,0) }
+      75%{ -webkit-transform:translate3d(2px,2px,0); transform:translate3d(2px,2px,0) }
+    }
+
+    .bump{ animation:bump .1s ease-out 1 }
+
+    @keyframes bump{
+      from{ -webkit-transform:scale3d(.985,1,1); transform:scale3d(.985,1,1) }
+      to{ -webkit-transform:scale3d(1,1,1); transform:scale3d(1,1,1) }
+    }
+    
+    /* Enhanced interaction feedback */
+    .interaction-feedback {
+      position: absolute;
+      pointer-events: none;
+      z-index: var(--z-tooltip);
+      animation: feedbackPop 0.3s ease-out forwards;
+    }
+    
+    @keyframes feedbackPop {
+      0% { 
+        opacity: 0; 
+        transform: scale(0.5) translateY(10px);
+      }
+      50% { 
+        opacity: 1; 
+        transform: scale(1.1) translateY(-5px);
+      }
+      100% { 
+        opacity: 0; 
+        transform: scale(1) translateY(-10px);
+      }
+    }
+    
+    /* Skeleton loading states */
+    .skeleton-loading {
+      background: linear-gradient(90deg,
+        rgba(124,58,237,0.1) 25%,
+        rgba(124,58,237,0.2) 50%,
+        rgba(124,58,237,0.1) 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: var(--border-radius);
+    }
+    
+    .skeleton-button {
+      width: 200px;
+      height: 60px;
+      border-radius: 999px;
+    }
+    
+    .skeleton-text {
+      width: 120px;
+      height: 20px;
+      margin: var(--spacing-sm) 0;
+    }
+
+    @media (max-width: 768px) {
+      .start { font-size: 18px; padding: 16px 24px; }
+      .smirk { font-size: 80px; }
+    }
+
+    @media (max-width: 480px) {
+      .start { font-size: 16px; padding: 14px 20px; }
+      .smirk { font-size: 60px; }
+    }
+
+    .sr-only{
+      position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+      overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg,
+        rgba(124,58,237,0.1) 25%,
+        rgba(124,58,237,0.2) 50%,
+        rgba(124,58,237,0.1) 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: var(--border-radius);
+    }
+
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    @keyframes rippleExpand {
+      0% { 
+        width: 0; 
+        height: 0; 
+        opacity: 1;
+      }
+      100% { 
+        width: 200px; 
+        height: 200px; 
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="loading" id="loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-progress">
+      <div class="loading-progress-bar" id="loadingProgress"></div>
+    </div>
+    <div class="loading-text" id="loadingText">جاري التحميل...</div>
+  </div>
+
+  <div class="wrap" id="wrap">
+    <div class="skeleton-loading skeleton-button" id="skeletonButton"></div>
+    <button class="start" id="startBtn" aria-label="Start" tabindex="0" role="button" style="display: none;">اضغط هنا</button>
+  </div>
+
+  <main class="play" id="play" aria-label="Play field" tabindex="0">
+    <canvas id="particleCanvas"></canvas>
+    <img id="drifter" class="drifter" src="drift.png" alt="" />
+    <div class="smirk" id="smirk" aria-hidden="true">😝</div>
+    <div class="flash" id="flash"></div>
+    <p id="srHelp" class="sr-only" aria-live="polite"></p>
+  </main>
+
+  <!-- Audio with preload and compression -->
+  <audio id="sfxKeko" src="keko.mp3" preload="auto" playsinline></audio>
+  <audio id="bgMusic" src="falafel.mp3" preload="auto" playsinline loop></audio>
+
+<script>
+(()=>{
+  // Elements
+  const wrap = document.getElementById('wrap');
+  const startBtn = document.getElementById('startBtn');
+  const skeletonButton = document.getElementById('skeletonButton');
+  const play = document.getElementById('play');
+  const smirk = document.getElementById('smirk');
+  const flash = document.getElementById('flash');
+  const drifter = document.getElementById('drifter');
+  const sfxKeko = document.getElementById('sfxKeko');
+  const canvas = document.getElementById('particleCanvas');
+  const ctx = canvas.getContext('2d');
+  const srHelp = document.getElementById('srHelp');
+  const loading = document.getElementById('loading');
+  const loadingProgress = document.getElementById('loadingProgress');
+  const loadingText = document.getElementById('loadingText');
+
+  // Debug: Check if all elements are found
+  console.log('DOM Elements check:', {
+    wrap: !!wrap,
+    startBtn: !!startBtn,
+    play: !!play,
+    smirk: !!smirk,
+    flash: !!flash,
+    drifter: !!drifter,
+    sfxKeko: !!sfxKeko,
+    canvas: !!canvas,
+    ctx: !!ctx,
+    srHelp: !!srHelp,
+    loading: !!loading
+  });
+
+  if (!wrap || !startBtn || !play || !canvas || !loading) {
+    console.error('Critical DOM elements missing!');
+    document.body.innerHTML = '<div style="padding: 20px; color: red;">Error: Critical elements not found. Please refresh the page.</div>';
+    return;
+  }
+
+  // Query flags
+  const q = new URLSearchParams(location.search);
+  const forceRM = q.get('rm') === '1' || q.get('reduced') === '1';
+
+  // Size/DPI cache
+  let viewW = 0, viewH = 0, dpr = 1;
+  let carWidthPx = 0, carHeightPx = 0, carTailLen = 0;
+  let currentDriftImage = 'drift.png';
+  let driftImageSide = 'right'; // 'right' for drift.png, 'left' for drift2.png
+
+  function updateCarMetrics(){
+    carWidthPx = Math.min(viewW * 0.38, 420);
+    const ratio = (drifter.naturalWidth > 0 && drifter.naturalHeight > 0)
+      ? drifter.naturalHeight / drifter.naturalWidth
+      : 1;
+    carHeightPx = carWidthPx * ratio;
+    carTailLen = carWidthPx * 0.46;
+  }
+
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    dpr = window.devicePixelRatio || 1;
+    canvas.width  = Math.max(1, Math.floor(rect.width  * dpr));
+    canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+    viewW = rect.width;
+    viewH = rect.height;
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.scale(dpr, dpr);
+    updateCarMetrics();
+  }
+  function clearCanvas() {
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+
+  // Global state
+  let particles = [];
+  let lastTime = 0;
+  let pressing = false;
+  let pressTimer = null;
+  let lastTrail = 0;
+  let paused = false;
+  let autoPaused = false;
+
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches || forceRM;
+
+  // Enhanced AUDIO SYSTEM with loading states
+  const audio = {
+    ctx: null,
+    unlocked: false,
+    muted: (()=> {
+      const q = new URLSearchParams(location.search);
+      return q.get('mute') === '1' || q.get('audio') === 'off';
+    })(),
+    loading: {
+      sfx: false,
+      bgMusic: false,
+      total: 0,
+      loaded: 0
+    }
+  };
+  const sfx = { keko: sfxKeko };
+  const bgMusic = document.getElementById('bgMusic');
+  
+  // Audio loading state management
+  function updateAudioLoadingState(type, loaded) {
+    if (loaded) {
+      audio.loading[type] = true;
+      audio.loading.loaded++;
+    }
+    
+    const progress = (audio.loading.loaded / audio.loading.total) * 100;
+    updateLoadingProgress(progress, `جاري تحميل الصوت... ${Math.round(progress)}%`);
+  }
+  
+  // Initialize audio loading states
+  audio.loading.total = 2; // sfx + bgMusic
+  audio.loading.loaded = 0;
+  
+  // Add audio loading event listeners
+  if (sfxKeko) {
+    sfxKeko.addEventListener('canplaythrough', () => updateAudioLoadingState('sfx', true));
+    sfxKeko.addEventListener('error', () => console.warn('SFX audio failed to load'));
+  }
+  
+  if (bgMusic) {
+    bgMusic.addEventListener('canplaythrough', () => updateAudioLoadingState('bgMusic', true));
+    bgMusic.addEventListener('error', () => console.warn('Background music failed to load'));
+  }
+  
+  // Enhanced image preloading for drift images
+  function preloadImage(src) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+      img.src = src;
+    });
+  }
+  
+  // Enhanced image preloading with multiple strategies
+  function preloadImageWithFallback(src) {
+    return new Promise((resolve, reject) => {
+      // Try to use the browser's native preloading
+      if ('connection' in navigator && navigator.connection.effectiveType === '4g') {
+        // High-speed connection - load immediately
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+        img.src = src;
+      } else {
+        // Slower connection - use progressive loading
+        setTimeout(() => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+          img.src = src;
+        }, 100);
+      }
+    });
+  }
+  
+  // Preload both drift images with enhanced strategy
+  Promise.all([
+    preloadImageWithFallback('drift.png'),
+    preloadImageWithFallback('drift2.png')
+  ]).then(() => {
+    console.log('Both drift images preloaded successfully');
+    // Update loading progress when images are ready
+    updateLoadingProgress(75, 'تم تحميل الصور...');
+  }).catch(error => {
+    console.warn('Some drift images failed to preload:', error);
+  });
+
+  function initAudio(){
+    if (audio.ctx) return;
+    try { audio.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch(e){ audio.ctx = null; }
+  }
+  async function unlockAudio(){
+    if (audio.unlocked) return;
+    initAudio();
+    try {
+      if (audio.ctx && audio.ctx.state === 'suspended') await audio.ctx.resume();
+      if (audio.ctx) {
+        const g = audio.ctx.createGain(); g.gain.value = 0; g.connect(audio.ctx.destination); g.disconnect();
+      }
+      audio.unlocked = true;
+      if (bgMusic) {
+        bgMusic.volume = 0.25;
+        try { await bgMusic.play(); } catch(e) {}
+      }
+    } catch(e){}
+  }
+  function ping(){
+    if (!audio.ctx) return;
+    const o = audio.ctx.createOscillator();
+    const g = audio.ctx.createGain();
+    o.type='triangle';
+    o.frequency.value=1600;
+    g.gain.value=0.0001;
+    const t0 = audio.ctx.currentTime;
+    g.gain.exponentialRampToValueAtTime(0.18, t0+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0+0.12);
+    o.connect(g).connect(audio.ctx.destination);
+    o.start(); o.stop(t0+0.15);
+  }
+  function playSfx(name){
+    if (audio.muted || !audio.unlocked) return;
+    const el = sfx[name];
+    if (!el) return;
+    try {
+      el.pause(); el.currentTime = 0;
+      const p = el.play(); if (p && typeof p.then === 'function') p.catch(()=>{});
+    } catch(e){}
+  }
+  sfxKeko.addEventListener('ended', ()=>{ if (audio.unlocked) ping(); });
+
+  // Utils
+  function rand(min,max){ return Math.random()*(max-min)+min }
+  function pickColor(){ const p=['#7c3aed','#10b981','#f59e0b','#06b6d4','#e11d48','#a3e635']; return p[(Math.random()*p.length)|0] }
+  
+  // Enhanced haptic feedback
+  function haptic(){
+    play.classList.add('bump'); 
+    setTimeout(()=>play.classList.remove('bump'), 100);
+    
+    // Enhanced haptic feedback for mobile
+    if (navigator.vibrate) {
+      navigator.vibrate(50);
+    }
+    
+    // Visual feedback
+    createInteractionFeedback();
+  }
+  
+  function announce(msg){ srHelp.textContent = msg; }
+  
+  // Create visual feedback for interactions
+  function createInteractionFeedback() {
+    const feedback = document.createElement('div');
+    feedback.className = 'interaction-feedback';
+    feedback.innerHTML = '🦗';
+    feedback.style.left = Math.random() * (viewW - 100) + 50 + 'px';
+    feedback.style.top = Math.random() * (viewH - 100) + 50 + 'px';
+    feedback.style.fontSize = '24px';
+    feedback.style.color = pickColor();
+    
+    play.appendChild(feedback);
+    
+    setTimeout(() => {
+      if (feedback.parentNode) {
+        feedback.parentNode.removeChild(feedback);
+      }
+    }, 300);
+  }
+  
+  // Enhanced loading system
+  function updateLoadingProgress(progress, text) {
+    if (loadingProgress) {
+      loadingProgress.style.width = progress + '%';
+    }
+    if (loadingText && text) {
+      loadingText.textContent = text;
+    }
+  }
+  
+  // Skeleton loading management
+  function showSkeleton() {
+    if (skeletonButton) skeletonButton.style.display = 'block';
+    if (startBtn) startBtn.style.display = 'none';
+  }
+  
+  function hideSkeleton() {
+    if (skeletonButton) skeletonButton.style.display = 'none';
+    if (startBtn) startBtn.style.display = 'inline-flex';
+  }
+
+  // Pre-rendered smoke sprites with multiple variations
+  const smokeSprites = [];
+  (function makeSmokeSprites(){
+    for(let i = 0; i < 3; i++) {
+      const sprite = document.createElement('canvas');
+      const s = 64 + i * 16; // Different sizes for variety
+      sprite.width = s; sprite.height = s;
+      const g = sprite.getContext('2d');
+      
+      // Create more realistic smoke with multiple layers
+      const grad1 = g.createRadialGradient(s/2, s/2, 0, s/2, s/2, s/2);
+      grad1.addColorStop(0, 'rgba(255,255,255,0.8)');
+      grad1.addColorStop(0.3, 'rgba(220,220,220,0.6)');
+      grad1.addColorStop(0.7, 'rgba(180,180,180,0.3)');
+      grad1.addColorStop(1, 'rgba(120,120,120,0)');
+      
+      g.fillStyle = grad1;
+      g.beginPath(); 
+      // Create irregular smoke shape
+      const noise = 0.3;
+      for(let j = 0; j < 8; j++) {
+        const angle = (j / 8) * Math.PI * 2;
+        const radius = s/2 * (0.7 + Math.random() * noise);
+        const x = s/2 + Math.cos(angle) * radius;
+        const y = s/2 + Math.sin(angle) * radius;
+        if(j === 0) g.moveTo(x, y);
+        else g.lineTo(x, y);
+      }
+      g.closePath(); g.fill();
+      
+      // Add darker core for depth
+      const grad2 = g.createRadialGradient(s/2, s/2, 0, s/2, s/2, s/3);
+      grad2.addColorStop(0, 'rgba(100,100,100,0.4)');
+      grad2.addColorStop(1, 'rgba(100,100,100,0)');
+      g.fillStyle = grad2;
+      g.beginPath(); g.arc(s/2, s/2, s/3, 0, Math.PI*2); g.fill();
+      
+      smokeSprites.push(sprite);
+    }
+  })();
+
+  // Enhanced device capability detection
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const isLowEnd = navigator.deviceMemory && navigator.deviceMemory < 2;
+  const isHighEnd = navigator.deviceMemory && navigator.deviceMemory > 6;
+  const hasHighRefreshRate = window.screen && window.screen.refreshRate > 60;
+  
+  const quality = { 
+    density: isMobile ? 0.45 : (isLowEnd ? 0.6 : 0.9), 
+    heavy: !isMobile && !isLowEnd && (navigator.deviceMemory || 4) > 3,
+    adaptive: true
+  };
+  
+  const BASE_MAX = isMobile ? (isLowEnd ? 100 : 150) : (isLowEnd ? 200 : 350);
+  let maxParticles = BASE_MAX;
+  
+  // Adaptive particle density based on performance
+  function adjustParticleDensity() {
+    const fps = 1 / Math.max(emaDt, 1e-6);
+    
+    if (fps < 45 && quality.adaptive) {
+      // Reduce density for better performance
+      quality.density = Math.max(0.3, quality.density * 0.9);
+      maxParticles = Math.max(50, Math.floor(maxParticles * 0.85));
+    } else if (fps > 58 && quality.adaptive && !isLowEnd) {
+      // Increase density if performance allows
+      quality.density = Math.min(1.0, quality.density * 1.05);
+      maxParticles = Math.min(BASE_MAX, Math.floor(maxParticles * 1.1));
+    }
+  }
+
+  function addParticle(props) {
+    const defaults = { life:1, vx:0, vy:0, rot:0, vrot:0, scale:1, opacity:1, update:null, render:null };
+    particles.push({ ...defaults, ...props });
+    if (particles.length > maxParticles) particles.splice(0, particles.length - maxParticles);
+  }
+
+  function chooseToken(){
+    const r = Math.random();
+    if(r < 0.50) return { type:'keko', mode:'text', text:'كيكو' };
+    if(r < 0.80) return { type:'smirk', mode:'text', text:'😝' };
+    const stars = ['🦗','👎🏿','👎🏿'];
+    return { type:'emoji', mode:'text', text: stars[(Math.random()*stars.length)|0] };
+  }
+
+  function renderText(p, ctx) {
+    ctx.fillStyle = p.color;
+    ctx.font = `900 ${p.size}px ui-rounded, system-ui, sans-serif`;
+    ctx.fillText(p.text, 0, 0);
+  }
+  function renderImage(p, ctx) { ctx.drawImage(p.src, -p.size/2, -p.size/2, p.size, p.size); }
+  function renderSmoke(p, ctx) {
+    const sprite = smokeSprites[p.spriteIndex || 0];
+    const s = p.size;
+    ctx.drawImage(sprite, -s/2, -s/2, s, s);
+  }
+
+  function updateFall(p, dt) {
+    const elapsed = (p.initialLife - p.life) * 1000;
+    const progress = Math.min(1, elapsed / p.duration);
+    p.x = p.startX + p.endX * progress;
+    p.y = p.startY + p.endY * progress;
+    p.rot += p.vrot * dt;
+    p.life -= dt / (p.duration / 1000);
+  }
+  function updatePop(p, dt) {
+    const elapsed = (p.initialLife - p.life) * 1000;
+    const progress = Math.min(1, elapsed / p.duration);
+    p.scale = progress;
+    p.opacity = 1 - Math.pow(progress, 3);
+    p.life -= dt / (p.duration / 1000);
+  }
+  function updateBounce(p, dt) {
+    const g = prefersReduced ? 10 : 600;
+    const bounce = 0.6;
+    const fric = 0.996;
+    p.vy += g * dt;
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.vx *= fric;
+    const floorY = viewH - p.size/2;
+    const leftX = p.size/2;
+    const rightX = viewW - p.size/2;
+    if (p.y > floorY) { p.y = floorY; p.vy *= -bounce; p.vx *= 0.96; }
+    if (p.x < leftX || p.x > rightX) { p.vx *= -bounce; p.x = Math.min(Math.max(p.x, leftX), rightX); }
+    p.life -= dt * 0.5;
+  }
+
+  function rainBurst(x,y, token){
+    const base = 22 + (Math.random()*10|0);
+    const total = Math.max(12, Math.round(base * quality.density));
+    for(let i=0;i<total;i++){
+      const isImg = token.mode === 'img';
+      const pSize = isImg ? rand(36, 64) : rand(18, 36);
+      addParticle({
+        x, y, startX:x, startY:y, endX:rand(-160,160), endY:rand(120,300),
+        size:pSize, color:pickColor(), text:token.text, src:token.src,
+        life:1, initialLife:1, duration: prefersReduced ? 200 : rand(700,1200),
+        rot:0, vrot:rand(-5,5), update:updateFall, render:isImg?renderImage:renderText
+      });
+    }
+  }
+  function bouncyFloor(x,y, token){
+    const base = 12 + (Math.random()*6|0);
+    const total = Math.max(6, Math.round(base * quality.density));
+    for(let i=0;i<total;i++){
+      const isImg = token.mode === 'img';
+      const pSize = isImg ? rand(34,56) : rand(18,30);
+      addParticle({
+        x, y, vx:rand(-120,120), vy:rand(-80,-180),
+        size:pSize, color:pickColor(), text:token.text, src:token.src,
+        life:rand(1.8,2.4), update:updateBounce, render:isImg?renderImage:renderText
+      });
+    }
+  }
+  function popEffect(x,y, token, count, life, sizeMin, sizeMax){
+    for(let i=0;i<count;i++){
+      const isImg = token.mode === 'img';
+      const pSize = rand(sizeMin, sizeMax);
+      addParticle({
+        x: x + rand(-70,70), y: y + rand(-40,40),
+        size:pSize, color:pickColor(), text:token.text, src:token.src,
+        life:1, initialLife:1, duration:life, scale:0, update:updatePop,
+        render:isImg?renderImage:renderText
+      });
+    }
+  }
+  function spawnParrots(x,y,n){
+    popEffect(x, y, {type:'parrot', mode:'text', text:'🦜'},
+      Math.max(6, Math.round((n || 10) * quality.density)), 900, 22, 32);
+  }
+  function spark(x,y){
+    addParticle({
+      x, y, size:8, color:'rgba(255,255,255,.8)', life:1, initialLife:1, duration:120, scale:0,
+      update:updatePop,
+      render:(p, ctx)=>{ ctx.fillStyle=p.color; ctx.beginPath(); ctx.arc(0,0,p.size/2,0,Math.PI*2); ctx.fill(); }
+    });
+  }
+
+  function curtainDrop(){
+    const rows = 3, cols = 6;
+    const w = viewW/(cols+1), h = viewH/(rows+1);
+    const emojis = ['😛','🦗','👎🏿','😝'];
+    for(let r=1;r<=rows;r++){
+      for(let c=1;c<=cols;c++){
+        const tk = { type:'emoji', mode:'text', text: emojis[(Math.random()*emojis.length)|0] };
+        addParticle({
+          x:w*c, y:-20, startX:w*c, startY:-20, endX:rand(-16,16), endY:(h*r + rand(16,40)) + 20,
+          size:26, color:pickColor(), text:tk.text, life:1, initialLife:1,
+          duration: prefersReduced?160:rand(600,1000), rot:0, vrot:rand(-2,2),
+          update:updateFall, render:renderText
+        });
+      }
+    }
+  }
+  function emojiGeyser(){ bouncyFloor(viewW/2, viewH-30, {type:'smirk', mode:'text', text:'😝'}); }
+  function confettiColumns(){
+    const cols = 4, gap = viewW/(cols+1);
+    for(let c=1;c<=cols;c++) rainBurst(gap*c, 20, {type:'emoji', mode:'text', text:'👎🏿'});
+  }
+  function randomEffect(x,y){
+    const token = chooseToken();
+    (Math.random()<0.5 ? bouncyFloor : rainBurst)(x,y, token);
+    if(token.type==='keko') playSfx('keko');
+    if(token.type==='keko') spawnParrots(x,y);
+  }
+  function chaos(){
+    let t = 0;
+    const maxBursts = quality.heavy ? 8 : 6;
+    const spam = setInterval(()=>{
+      const rx = rand(40, viewW-40);
+      const ry = rand(40, viewH-40);
+      randomEffect(rx, ry);
+      if(++t>=maxBursts) clearInterval(spam);
+    }, 160);
+    if(!prefersReduced){ play.classList.add('shake'); setTimeout(()=>play.classList.remove('shake'), 280); }
+    else { flash.classList.add('show'); setTimeout(()=>flash.classList.remove('show'), 200); }
+    haptic();
+  }
+
+  const car = {
+    x:0, y:0, theta:-0.4, u:360, v:0, rYaw:0,
+    a:70, b:70, invM:1/1400, invIz:1/50000, CfBase:18000, CrBase:12000, steerMax:0.75,
+    mu:1.15, Cf:18000, Cr:10200, side:1, targetBeta:0.8, targetSpeed:500,
+    nextSwitch:0, nextEbrake:0, ebrakeUntil:0
+  };
+  function clamp(t, lo, hi){ return t<lo?lo:(t>hi?hi:t); }
+  function norm(a){ while(a>Math.PI) a-=Math.PI*2; while(a<-Math.PI) a+=Math.PI*2; return a; }
+
+  function selectRandomDriftImage() {
+    const useDrift2 = Math.random() < 0.5;
+    currentDriftImage = useDrift2 ? 'drift2.png' : 'drift.png';
+    driftImageSide = useDrift2 ? 'left' : 'right';
+    
+    // Update the drifter image source
+    if (drifter) {
+      drifter.src = currentDriftImage;
+    }
+    
+    console.log(`Selected drift image: ${currentDriftImage} (smoke from ${driftImageSide})`);
+  }
+
+  function initCar(ts){
+    // Select random drift image for this session
+    selectRandomDriftImage();
+    
+    car.x = viewW*0.25; car.y = viewH*0.7; car.theta = -0.4; car.u = 360; car.v = 0; car.rYaw = 0;
+    car.Cf = car.CfBase; car.Cr = car.CrBase*0.85; car.mu = 1.15;
+    car.side = Math.random()<0.5 ? -1 : 1;
+    car.targetBeta = car.side*rand(0.65,1.05);
+    car.targetSpeed = rand(420,560);
+    car.nextSwitch = ts + rand(700,1400);
+    car.nextEbrake = ts + rand(900,2000);
+    car.ebrakeUntil = 0;
+  }
+
+  function stepCar(dt, ts){
+    if (ts > car.nextSwitch){
+      car.side = Math.random()<0.5 ? -1 : 1;
+      car.targetBeta = car.side*rand(0.65,1.05);
+      car.targetSpeed = rand(420,560);
+      car.nextSwitch = ts + rand(700,1400);
+    }
+    if (ts > car.nextEbrake){
+      car.ebrakeUntil = ts + rand(180,320);
+      car.nextEbrake = ts + rand(900,2000);
+    }
+
+    const beta = norm(Math.atan2(car.v, car.u));
+    let delta = clamp(-1.4*(beta - car.targetBeta) - 0.15*car.rYaw, -car.steerMax, car.steerMax);
+    if(ts < car.ebrakeUntil){ car.mu = 0.85; car.Cr = car.CrBase*0.35; }
+    else { car.mu = 1.15; car.Cr = car.CrBase*0.85; }
+
+    const af = norm(Math.atan2(car.v + car.a*car.rYaw, Math.max(1,car.u)) - delta);
+    const ar = norm(Math.atan2(car.v - car.b*car.rYaw, Math.max(1,car.u)));
+
+    let Fyf = -car.Cf * af;
+    let Fyr = -car.Cr * ar;
+    const FyMaxF = car.mu*12000, FyMaxR = car.mu*9000;
+    Fyf = clamp(Fyf, -FyMaxF, FyMaxF);
+    Fyr = clamp(Fyr, -FyMaxR, FyMaxR);
+
+    const speed2 = car.u*car.u + car.v*car.v;
+    const target2 = car.targetSpeed*car.targetSpeed;
+    let ax = speed2 < target2 ? 280 : -180;
+    if(ts < car.ebrakeUntil) ax -= 120;
+
+    car.u += dt*(ax + car.rYaw*car.v + (-Fyf*Math.sin(delta))*car.invM);
+    car.v += dt*((Fyr + Fyf*Math.cos(delta))*car.invM - car.rYaw*car.u);
+    car.rYaw += dt*((car.a*Fyf*Math.cos(delta) - car.b*Fyr)*car.invIz);
+
+    const ct = Math.cos(car.theta), st = Math.sin(car.theta);
+    const wx = car.u*ct - car.v*st, wy = car.u*st + car.v*ct;
+    car.x += wx*dt; car.y += wy*dt; car.theta += car.rYaw*dt;
+
+    const m = 40;
+    if(car.x < m || car.x > viewW - m){
+      car.x = Math.max(m, Math.min(viewW - m, car.x));
+      const nx = car.x < viewW*0.5 ? 1 : -1;
+      const rwx = -wx*0.6, rwy = wy;
+      car.u = rwx*ct + rwy*st; car.v = -rwx*st + rwy*ct; car.rYaw += 1.0*nx;
+    }
+    if(car.y < m || car.y > viewH - m){
+      car.y = Math.max(m, Math.min(viewH - m, car.y));
+      const ny = car.y < viewH*0.5 ? 1 : -1;
+      const rwx = wx, rwy = -wy*0.6;
+      car.u = rwx*ct + rwy*st; car.v = -rwx*st + rwy*ct; car.rYaw -= 0.8*ny;
+    }
+
+    // Reduced intensity smoke system
+    if(!prefersReduced){
+      const slip = Math.abs(ar);
+      if(slip > 0.35){ // Higher threshold for less smoke
+        const rearX = car.x - ct*carTailLen, rearY = car.y - st*carTailLen;
+        const strong = slip > 0.6;
+        const veryStrong = slip > 0.8;
+        
+        // Calculate smoke direction based on car movement and selected image
+        let smokeDirX, smokeDirY;
+        
+        if (driftImageSide === 'right') {
+          // For drift.png: smoke comes from right side of car
+          smokeDirX = ct * 0.5 + st * 0.2;
+          smokeDirY = st * 0.5 - ct * 0.2;
+        } else {
+          // For drift2.png: smoke comes from left side of car
+          smokeDirX = -ct * 0.5 + st * 0.2;
+          smokeDirY = -st * 0.5 - ct * 0.2;
+        }
+        
+        // Generate fewer smoke particles
+        const baseCount = strong ? (veryStrong ? 2 : 1) : 1;
+        const count = Math.floor(baseCount * quality.density);
+        
+        for (let i = 0; i < count; i++) {
+          const spriteIndex = Math.floor(Math.random() * smokeSprites.length);
+          const baseSize = strong ? (veryStrong ? rand(20, 32) : rand(16, 24)) : rand(12, 20);
+          
+          // Calculate initial velocity with reduced intensity
+          const speed = rand(8, veryStrong ? 25 : 15);
+          const angle = rand(-0.3, 0.3) + Math.atan2(smokeDirY, smokeDirX);
+          const vx = Math.cos(angle) * speed + rand(-4, 4);
+          const vy = Math.sin(angle) * speed + rand(-8, -4);
+          
+          // Reduced turbulence and wind effects
+          const turbulence = rand(-1.5, 1.5);
+          const windEffect = rand(-1, 1);
+          
+          // Calculate smoke starting position at the edge of the car image
+          let smokeStartX, smokeStartY;
+          if (driftImageSide === 'right') {
+            // For drift.png: smoke starts from right edge
+            smokeStartX = rearX + (ct * carWidthPx * 0.5) + rand(-2, 2);
+            smokeStartY = rearY + (st * carWidthPx * 0.5) + rand(-1, 1);
+          } else {
+            // For drift2.png: smoke starts from left edge
+            smokeStartX = rearX - (ct * carWidthPx * 0.5) + rand(-2, 2);
+            smokeStartY = rearY - (st * carWidthPx * 0.5) + rand(-1, 1);
+          }
+          
+          addParticle({
+            x: smokeStartX, y: smokeStartY,
+            vx: vx + turbulence, vy: vy + windEffect,
+            size: baseSize, life: rand(1.2, 1.8), opacity: rand(0.2, 0.5),
+            rot: rand(0, Math.PI*2), vrot: rand(-1, 1),
+            spriteIndex: spriteIndex,
+            initialSize: baseSize,
+            update: function(p, dt) {
+              // Reduced smoke physics
+              const airResistance = 0.99;
+              const buoyancy = -8; // Reduced upward force
+              const turbulence = Math.sin(p.life * 8) * 1;
+              
+              p.vx *= airResistance;
+              p.vy = (p.vy + buoyancy * dt) * airResistance + turbulence * dt;
+              p.x += p.vx * dt;
+              p.y += p.vy * dt;
+              p.rot += p.vrot * dt;
+              
+              // Smoke expands and fades over time (reduced expansion)
+              p.life -= dt * 1.0;
+              p.opacity = p.life * 0.5;
+              p.scale = 1 + (1 - p.life) * 1.5; // Less dramatic expansion
+              p.size = p.initialSize * p.scale;
+              
+              // Ensure smoke reaches edge of screen by extending beyond
+              if(p.x < -50) p.x = viewW + 50;
+              if(p.x > viewW + 50) p.x = -50;
+              if(p.y < -50) p.y = viewH + 50;
+              if(p.y > viewH + 50) p.y = -50;
+            },
+            render: renderSmoke
+          });
+        }
+        
+        // Rare larger smoke puffs (reduced frequency)
+        if(veryStrong && Math.random() < 0.1) {
+          const puffSize = rand(24, 36);
+          
+          // Calculate puff starting position at the edge of the car image
+          let puffStartX, puffStartY;
+          if (driftImageSide === 'right') {
+            // For drift.png: puff starts from right edge
+            puffStartX = rearX + (ct * carWidthPx * 0.5) + rand(-3, 3);
+            puffStartY = rearY + (st * carWidthPx * 0.5) + rand(-2, 2);
+          } else {
+            // For drift2.png: puff starts from left edge
+            puffStartX = rearX - (ct * carWidthPx * 0.5) + rand(-3, 3);
+            puffStartY = rearY - (st * carWidthPx * 0.5) + rand(-2, 2);
+          }
+          
+          addParticle({
+            x: puffStartX, y: puffStartY,
+            vx: smokeDirX * rand(12, 18) + rand(-3, 3),
+            vy: smokeDirY * rand(12, 18) + rand(-6, -3),
+            size: puffSize, life: rand(1.8, 2.2), opacity: rand(0.3, 0.6),
+            rot: rand(0, Math.PI*2), vrot: rand(-0.5, 0.5),
+            spriteIndex: Math.floor(Math.random() * smokeSprites.length),
+            initialSize: puffSize,
+            update: function(p, dt) {
+              p.vx *= 0.995;
+              p.vy = (p.vy - 4) * 0.995; // Slower upward drift
+              p.x += p.vx * dt;
+              p.y += p.vy * dt;
+              p.rot += p.vrot * dt;
+              p.life -= dt * 0.8;
+              p.opacity = p.life * 0.6;
+              p.scale = 1 + (1 - p.life) * 2;
+              p.size = p.initialSize * p.scale;
+            },
+            render: renderSmoke
+          });
+        }
+      }
+    }
+
+    // Push nearby particles using squared distance
+    const R = 110, R2 = R*R;
+    for (const p of particles) {
+      const dx = p.x - car.x, dy = p.y - car.y;
+      const d2 = dx*dx + dy*dy;
+      if (d2 < R2) {
+        const d = Math.sqrt(Math.max(d2, 1e-6));
+        const push = (R - d) * 0.08;
+        const inv = 1 / d;
+        p.x += dx * inv * push;
+        p.y += dy * inv * push;
+      }
+    }
+
+    drifter.style.transform = `translate(${car.x - carWidthPx/2}px, ${car.y - carHeightPx/2}px) rotate(${car.theta}rad)`;
+  }
+
+  let emaDt = 1/60;
+  let lastAdapt = 0;
+  let performanceMetrics = {
+    fps: 60,
+    particleCount: 0,
+    memoryUsage: 0
+  };
+  
+  function mainLoop(ts) {
+    const dt = lastTime ? Math.min(0.05, (ts - lastTime) / 1000) : 0;
+    lastTime = ts;
+
+    clearCanvas();
+
+    if (!paused) {
+      stepCar(dt, ts);
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        if (p.update) p.update(p, dt);
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+
+      emaDt = emaDt * 0.9 + dt * 0.1;
+      const fps = 1 / Math.max(emaDt, 1e-6);
+      performanceMetrics.fps = fps;
+      performanceMetrics.particleCount = particles.length;
+      
+      if (ts - lastAdapt > 1200) {
+        adjustParticleDensity();
+        lastAdapt = ts;
+      }
+    }
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (const p of particles) {
+      if (!p.render) continue;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.scale(p.scale, p.scale);
+      ctx.globalAlpha = p.opacity;
+      p.render(p, ctx);
+      ctx.restore();
+    }
+
+    requestAnimationFrame(mainLoop);
+  }
+
+  function setPaused(flag){
+    if (paused === flag) return;
+    paused = flag;
+    play.classList.toggle('paused', paused);
+    announce(paused ? 'تم الإيقاف المؤقت.' : 'تم الاستئناف.');
+  }
+
+  function resetScene(){
+    particles.length = 0;
+    // Select a new random drift image for each reset
+    selectRandomDriftImage();
+    initCar(performance.now());
+    smirk.classList.add('show'); setTimeout(()=> smirk.classList.remove('show'), 700);
+    curtainDrop();
+    setTimeout(()=>confettiColumns(), 300);
+  }
+
+  function startShow(){
+    try {
+      // Enhanced loading sequence with progress
+      updateLoadingProgress(100, 'تم التحميل!');
+      
+      setTimeout(() => {
+        loading.classList.add('hidden');
+        
+        // Smooth transition to wrap
+        wrap.classList.add('entering');
+        setTimeout(() => {
+          wrap.classList.remove('entering');
+        }, 800);
+        
+        // Hide wrap with animation
+        setTimeout(() => {
+          wrap.classList.add('hidden');
+          
+          // Show play area with smooth transition
+          setTimeout(() => {
+            play.style.display = 'block';
+            play.classList.add('visible');
+            
+            resizeCanvas();
+            unlockAudio();
+            initCar(performance.now());
+            
+            // Staggered animations for better visual flow
+            smirk.classList.add('show'); 
+            setTimeout(()=> smirk.classList.remove('show'), 700);
+            
+            curtainDrop();
+            setTimeout(()=>randomEffect(viewW/2, viewH/2), 140);
+            setTimeout(()=>emojiGeyser(), 300);
+            setTimeout(()=>confettiColumns(), 520);
+            
+            lastTime = performance.now();
+            announce('التحكم: Enter أو مسافة للتأثير. P إيقاف/استئناف. M كتم. R إعادة تعيين. I تبديل الصورة.');
+            requestAnimationFrame(mainLoop);
+            play.focus();
+          }, 300);
+        }, 400);
+      }, 500);
+      
+    } catch (error) {
+      console.error('Error in startShow function:', error);
+      announce('حدث خطأ في بدء العرض. يرجى تحديث الصفحة.');
+      // visible toast so the user actually sees it
+      const msg = document.createElement('div');
+      msg.style.cssText = "position:fixed;left:16px;right:16px;bottom:16px;background:#e11d48;color:#fff;padding:12px 16px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:99999;font-weight:700;text-align:center";
+      msg.textContent = "حدث خطأ عند البدء. حدّث الصفحة.";
+      document.body.appendChild(msg);
+    }
+  }
+
+  window.addEventListener('resize', resizeCanvas, { passive:true });
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.hidden){
+      if(!paused){ autoPaused = true; setPaused(true); }
+      sfxKeko.pause();
+    } else if (autoPaused){
+      setPaused(false); autoPaused = false;
+    }
+  });
+
+  window.addEventListener('pointerdown', unlockAudio, { once:true, passive:true });
+
+  // Enhanced initialization with progressive loading
+  function initializeInterface() {
+    // Show skeleton loading first
+    showSkeleton();
+    
+    // Simulate progressive loading
+    let progress = 0;
+    const loadingInterval = setInterval(() => {
+      progress += Math.random() * 15 + 5;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(loadingInterval);
+        
+        // Complete loading sequence
+        setTimeout(() => {
+          loading.classList.add('hidden');
+          hideSkeleton();
+          wrap.style.display = 'grid';
+          wrap.classList.add('entering');
+          
+          setTimeout(() => {
+            wrap.classList.remove('entering');
+          }, 800);
+        }, 300);
+      }
+      updateLoadingProgress(progress, `جاري التحميل... ${Math.round(progress)}%`);
+    }, 100);
+  }
+  
+  // Initialize the interface
+  initializeInterface();
+
+  // NEW: robust start handler (pointerup + click) with guard
+  let started = false;
+  function startShowGuard(e){
+    if (started) return;
+    started = true;
+    if (e && e.preventDefault) e.preventDefault();
+    startShow();
+  }
+  startBtn.addEventListener('pointerup', startShowGuard, { once:true });
+  startBtn.addEventListener('click', startShowGuard, { once:true });
+
+  // Fallback: If loading spinner persists for too long, show start button
+  setTimeout(() => {
+    if (loading.classList.contains('hidden') === false) {
+      console.warn('Loading spinner persisted too long, showing start button as fallback');
+      loading.style.display = 'none';
+      wrap.style.display = 'grid';
+    }
+  }, 5000);
+
+  play.addEventListener('pointerdown', e=>{
+    pressing = true;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    
+    // Enhanced visual feedback
+    spark(x,y); 
+    randomEffect(x,y);
+    
+    // Create ripple effect
+    createRippleEffect(x, y);
+    
+    // Enhanced haptic feedback
+    if (navigator.vibrate) {
+      navigator.vibrate([30, 20, 30]);
+    }
+    
+    pressTimer = setTimeout(()=>{ chaos(); }, 500);
+  }, { passive:true });
+  
+  // Enhanced ripple effect for interactions
+  function createRippleEffect(x, y) {
+    const ripple = document.createElement('div');
+    ripple.style.cssText = `
+      position: absolute;
+      left: ${x}px;
+      top: ${y}px;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: var(--z-tooltip);
+      animation: rippleExpand 0.6s ease-out forwards;
+    `;
+    
+    play.appendChild(ripple);
+    
+    setTimeout(() => {
+      if (ripple.parentNode) {
+        ripple.parentNode.removeChild(ripple);
+      }
+    }, 600);
+  }
+
+  play.addEventListener('pointermove', e=>{
+    if(!pressing) return;
+    const now = performance.now(); if(now - lastTrail < 50) return; lastTrail = now;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    const chs = ['✦','✧','•']; const ch = chs[(Math.random()*chs.length)|0];
+    addParticle({ x, y, size: 14, color: pickColor(), text: ch, life: 1, initialLife: 1, duration: 700, scale: 0, update: updatePop, render: renderText });
+  }, { passive:true });
+
+  play.addEventListener('pointerup', ()=>{ pressing = false; clearTimeout(pressTimer); pressTimer = null; }, { passive:true });
+  play.addEventListener('pointercancel', ()=>{ pressing = false; clearTimeout(pressTimer); pressTimer = null; }, { passive:true });
+
+  play.addEventListener('keydown', e=>{
+    const k = e.key.toLowerCase();
+    if(k==='enter' || k===' '){
+      randomEffect(viewW/2, viewH/2);
+      createInteractionFeedback();
+      e.preventDefault();
+    } else if(k==='p'){
+      setPaused(!paused); 
+      createInteractionFeedback();
+      e.preventDefault();
+    } else if(k==='m'){
+      audio.muted = !audio.muted;
+      if (bgMusic) { bgMusic.muted = audio.muted; }
+      announce(audio.muted ? 'تم كتم الصوت.' : 'تم تشغيل الصوت.');
+      createInteractionFeedback();
+      e.preventDefault();
+    } else if(k==='r'){
+      resetScene(); 
+      createInteractionFeedback();
+      e.preventDefault();
+    } else if(k==='i'){
+      // Manual image switch for testing
+      selectRandomDriftImage();
+      announce(`Switched to ${currentDriftImage} (smoke from ${driftImageSide})`);
+      createInteractionFeedback();
+      e.preventDefault();
+    }
+  });
+
+})();
+</script>
+</body>
+</html>
