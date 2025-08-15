@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="format-detection" content="telephone=no" />
-  <title>Judy</title>
+  <title>Judy Optimized</title>
 
   <!-- Favicons -->
   <link rel="icon" href="favicon.ico" sizes="any">
@@ -23,12 +23,6 @@
   <link rel="preload" href="drift2.png" as="image" type="image/png" fetchpriority="high">
   <link rel="preload" href="keko.mp3" as="audio" type="audio/mpeg">
   <link rel="preload" href="falafel.mp3" as="audio" type="audio/mpeg">
-  
-  <!-- Preload drift images with multiple formats for better performance -->
-  <link rel="preload" href="drift.png" as="image" type="image/png" media="(min-width: 768px)">
-  <link rel="preload" href="drift2.png" as="image" type="image/png" media="(min-width: 768px)">
-  <link rel="preload" href="drift.png" as="image" type="image/png" media="(max-width: 767px)">
-  <link rel="preload" href="drift2.png" as="image" type="image/png" media="(max-width: 767px)">
 
   <style>
     :root{
@@ -70,8 +64,12 @@
       --z-tooltip: 200;
 
       /* Button Specific Vars */
-      --glass-bg: rgba(255, 255, 255, 0.1);
-      --glass-border: rgba(255, 255, 255, 0.2);
+      --primary: #7c3aed;
+      --secondary: #10b981;
+      --accent: #f59e0b;
+      --tertiary: #06b6d4;
+      --quaternary: #e11d48;
+      --text-light: #ffffff;
       --transition-smooth: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
     @media (prefers-color-scheme: light){
@@ -204,212 +202,64 @@
       100% { transform: rotate(360deg); }
     }
     
-    /* Hybrid Ultra Design */
-    .start-hybrid {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 70px;
-      min-width: 220px;
-      padding: 22px 44px;
-      font-weight: 800;
-      font-size: 19px;
-      letter-spacing: 0.5px;
-      border-radius: 20px;
-      cursor: pointer;
-      border: 1.5px solid var(--glass-border);
-      
-      /* Glassmorphism Foundation */
-      background: 
-        linear-gradient(135deg, 
-          rgba(255, 255, 255, 0.15) 0%,
-          rgba(255, 255, 255, 0.05) 100%);
-      backdrop-filter: blur(20px) saturate(1.8);
-      -webkit-backdrop-filter: blur(20px) saturate(1.8);
-      
-      /* Advanced Multi-Layer Gradient */
-      background-image: 
-        /* Top glass reflection */
-        linear-gradient(135deg, 
-          rgba(255, 255, 255, 0.3) 0%, 
-          transparent 30%, 
-          transparent 70%, 
-          rgba(255, 255, 255, 0.1) 100%),
-        /* Core holographic gradient */
-        conic-gradient(from 45deg at 50% 50%,
-          rgba(124, 58, 237, 0.4) 0deg,
-          rgba(16, 185, 129, 0.4) 72deg,
-          rgba(245, 158, 11, 0.4) 144deg,
-          rgba(6, 182, 212, 0.4) 216deg,
-          rgba(225, 29, 72, 0.4) 288deg,
-          rgba(124, 58, 237, 0.4) 360deg),
-        /* Base depth gradient */
-        radial-gradient(ellipse at center,
-          rgba(124, 58, 237, 0.2) 0%,
-          rgba(16, 185, 129, 0.15) 50%,
-          transparent 100%);
-      
-      color: #fff;
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-      
-      /* Neumorphic 3D Shadows */
-      box-shadow: 
-        /* Outer neumorphic shadows */
-        12px 12px 24px rgba(0, 0, 0, 0.4),
-        -8px -8px 16px rgba(255, 255, 255, 0.02),
-        /* Inner glow */
-        inset 0 1px 2px rgba(255, 255, 255, 0.2),
-        inset 0 -1px 2px rgba(0, 0, 0, 0.2),
-        /* Outer holographic glow */
-        0 0 30px rgba(124, 58, 237, 0.2),
-        0 0 60px rgba(16, 185, 129, 0.1);
-      
-      transition: all var(--transition-smooth);
-      transform-style: preserve-3d;
-      transform: translateZ(0) rotateX(0deg) rotateY(0deg);
-      will-change: transform, box-shadow, background;
-      overflow: hidden;
-      animation: subtleFloat 6s ease-in-out infinite;
+    /* --- Base Button Styles --- */
+    .hybrid-base {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 70px;
+        width: 220px;
+        padding: 22px 44px;
+        font-weight: 800;
+        font-size: 19px;
+        letter-spacing: 0.5px;
+        border-radius: 20px;
+        cursor: pointer;
+        color: var(--text-light);
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        transition: all var(--transition-smooth);
+        transform-style: preserve-3d;
+        transform: translateZ(0) rotateX(0deg) rotateY(0deg);
+        will-change: transform, box-shadow, background;
+        overflow: hidden;
+        border: none;
     }
 
-    /* Animated gradient background layer */
-    .start-hybrid::before {
-      content: '';
-      position: absolute;
-      inset: -2px;
-      border-radius: 22px;
-      padding: 2px;
-      background: 
-        conic-gradient(from 0deg,
-          var(--a) 0deg,
-          var(--b) 60deg,
-          var(--c) 120deg,
-          var(--d) 180deg,
-          var(--e) 240deg,
-          var(--a) 300deg,
-          var(--b) 360deg);
-      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask-composite: xor;
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      opacity: 0;
-      animation: gradientRotate 8s linear infinite paused;
-      transition: opacity var(--transition-smooth);
-      z-index: -1;
+    /* Variation 2: Glitched Orb */
+    .hybrid-merge-1 {
+        width: 140px;
+        height: 140px;
+        min-height: auto;
+        padding: 0;
+        background: rgba(124, 58, 237, 0.2);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        animation: liquidMorph 12s ease-in-out infinite alternate;
+        border: 1px solid rgba(124, 58, 237, 0.5);
+    }
+    .hybrid-merge-1 .text {
+        transition: all 0.2s;
+    }
+    .hybrid-merge-1:hover .text {
+        animation: glitch 0.5s steps(3, end) infinite;
+        text-shadow: -3px 0 var(--secondary), 3px 0 var(--quaternary);
     }
 
-    /* Shimmer effect overlay */
-    .start-hybrid::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -120%;
-      width: 120%;
-      height: 100%;
-      background: linear-gradient(90deg, 
-        transparent 0%, 
-        rgba(255, 255, 255, 0.3) 30%,
-        rgba(255, 255, 255, 0.5) 50%,
-        rgba(255, 255, 255, 0.3) 70%,
-        transparent 100%);
-      transform: skewX(-20deg);
-      transition: left 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      z-index: 1;
-      pointer-events: none;
+    @keyframes liquidMorph {
+        0%, 100% { border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; }
+        25% { border-radius: 58% 42% 30% 70% / 55% 55% 45% 45%; }
+        50% { border-radius: 30% 70% 42% 58% / 45% 45% 55% 55%; }
+        75% { border-radius: 70% 30% 58% 42% / 55% 55% 45% 45%; }
     }
 
-    /* Hover State - Ultimate Transformation */
-    .start-hybrid:hover {
-      transform: 
-        translateZ(0) 
-        rotateX(-8deg) 
-        rotateY(5deg) 
-        translateY(-4px) 
-        scale(1.03);
-      
-      border-color: rgba(124, 58, 237, 0.4);
-      
-      /* Enhanced shadows and glows */
-      box-shadow: 
-        /* Deeper neumorphic shadows */
-        16px 16px 32px rgba(0, 0, 0, 0.5),
-        -12px -12px 24px rgba(255, 255, 255, 0.03),
-        /* Stronger inner lighting */
-        inset 0 2px 4px rgba(255, 255, 255, 0.3),
-        inset 0 -2px 4px rgba(0, 0, 0, 0.3),
-        /* Amplified holographic aura */
-        0 0 40px rgba(124, 58, 237, 0.4),
-        0 0 80px rgba(16, 185, 129, 0.2),
-        0 0 120px rgba(245, 158, 11, 0.1);
-      
-      /* Enhanced backdrop blur */
-      backdrop-filter: blur(25px) saturate(2.2);
-      -webkit-backdrop-filter: blur(25px) saturate(2.2);
-    }
-
-    .start-hybrid:hover::before {
-      opacity: 0.8;
-      animation-play-state: running;
-    }
-
-    .start-hybrid:hover::after {
-      left: 120%;
-    }
-
-    /* Active/Press State */
-    .start-hybrid:active {
-      transform: 
-        translateZ(0) 
-        rotateX(-3deg) 
-        rotateY(2deg) 
-        translateY(-1px) 
-        scale(0.97);
-      
-      transition: all 0.1s ease-out;
-      
-      box-shadow: 
-        /* Pressed neumorphic state */
-        inset 8px 8px 16px rgba(0, 0, 0, 0.4),
-        inset -4px -4px 8px rgba(255, 255, 255, 0.02),
-        /* Compressed glow */
-        0 0 20px rgba(124, 58, 237, 0.3);
-    }
-
-    /* Focus state for accessibility */
-    .start-hybrid:focus-visible {
-      outline: none;
-      box-shadow: 
-        12px 12px 24px rgba(0, 0, 0, 0.4),
-        -8px -8px 16px rgba(255, 255, 255, 0.02),
-        inset 0 1px 2px rgba(255, 255, 255, 0.2),
-        inset 0 -1px 2px rgba(0, 0, 0, 0.2),
-        0 0 30px rgba(124, 58, 237, 0.2),
-        0 0 60px rgba(16, 185, 129, 0.1),
-        /* Focus ring */
-        0 0 0 3px rgba(124, 58, 237, 0.5);
-    }
-
-    /* Gradient rotation animation */
-    @keyframes gradientRotate {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* Subtle idle animation */
-    @keyframes subtleFloat {
-      0%, 100% { 
-        transform: translateZ(0) rotateX(0deg) rotateY(0deg) translateY(0px);
-      }
-      25% { 
-        transform: translateZ(0) rotateX(1deg) rotateY(-0.5deg) translateY(-2px);
-      }
-      50% { 
-        transform: translateZ(0) rotateX(-0.5deg) rotateY(1deg) translateY(-1px);
-      }
-      75% { 
-        transform: translateZ(0) rotateX(0.5deg) rotateY(0.5deg) translateY(-2px);
-      }
+    @keyframes glitch {
+        0% { transform: translate(0); }
+        20% { transform: translate(-3px, 3px); }
+        40% { transform: translate(-3px, -3px); }
+        60% { transform: translate(3px, 3px); }
+        80% { transform: translate(3px, -3px); }
+        100% { transform: translate(0); }
     }
 
     .play{
@@ -578,16 +428,6 @@
     }
 
     @media (max-width: 768px) {
-      .start-hybrid {
-        min-width: 200px;
-        min-height: 64px;
-        padding: 20px 40px;
-        font-size: 17px;
-        border-radius: 18px;
-      }
-      .start-hybrid::before {
-        border-radius: 20px;
-      }
       .smirk { font-size: 80px; }
       /* Make drifter image 50% bigger on mobile */
       .drifter {
@@ -596,35 +436,13 @@
     }
 
     @media (max-width: 480px) {
-      .start-hybrid {
-        min-width: 180px;
-        min-height: 58px;
-        padding: 18px 36px;
-        font-size: 16px;
-        border-radius: 16px;
-      }
-      .start-hybrid::before {
-        border-radius: 18px;
-      }
       .smirk { font-size: 60px; }
     }
     
     @media (prefers-reduced-motion: reduce) {
-      .start-hybrid {
+      .hybrid-base {
         animation: none;
         transition: all 0.2s ease;
-      }
-      .start-hybrid::before {
-        animation: none;
-      }
-      .start-hybrid::after {
-        transition: none;
-      }
-      .start-hybrid:hover {
-        transform: translateY(-2px) scale(1.02);
-      }
-      .start-hybrid:active {
-        transform: translateY(0) scale(0.98);
       }
     }
 
@@ -663,7 +481,7 @@
 
   <div class="wrap" id="wrap">
     <div class="skeleton-loading skeleton-button" id="skeletonButton"></div>
-    <button class="start-hybrid" id="startBtn" aria-label="Start" tabindex="0" role="button" style="display: none;">اضغط هنا</button>
+    <button class="hybrid-base hybrid-merge-1" id="startBtn" aria-label="Start" tabindex="0" role="button" style="display: none;"><span class="text">اضغط هنا</span></button>
   </div>
 
   <main class="play" id="play" aria-label="Play field" tabindex="0">
@@ -707,6 +525,25 @@
   const mainCtx = mainCanvas.getContext('2d');
   const canvases = [bgCanvas, tireMarkCanvas, mainCanvas];
 
+  // Wheel centers measured as fractions of the image (0..1) from top-left
+  const IMAGE_ANCHORS = {
+    'drift.png': {                     // driver inside
+      rearLeft:  { x: 0.22, y: 0.86 },
+      rearRight: { x: 0.83, y: 0.88 },
+      smokeFrom: 'right'
+    },
+    'drift2.png': {                    // leaning on door
+      rearLeft:  { x: 0.20, y: 0.86 },
+      rearRight: { x: 0.78, y: 0.86 },
+      smokeFrom: 'left'
+    }
+  };
+
+  // computed each resize
+  let wheelLocalLeft = {x:0,y:0};
+  let wheelLocalRight = {x:0,y:0};
+
+
   // Debug: Check if all elements are found
   console.log('DOM Elements check:', {
     wrap: !!wrap,
@@ -738,13 +575,19 @@
   let driftImageSide = 'right'; // 'right' for drift.png, 'left' for drift2.png
 
   function updateCarMetrics(){
-    // Use getBoundingClientRect for accurate sizing after CSS changes
     const carRect = drifter.getBoundingClientRect();
     carWidthPx = carRect.width;
+
     const ratio = (drifter.naturalWidth > 0 && drifter.naturalHeight > 0)
-      ? drifter.naturalHeight / drifter.naturalWidth
-      : 1;
+      ? drifter.naturalHeight / drifter.naturalWidth : 1;
     carHeightPx = carWidthPx * ratio;
+
+    const meta = IMAGE_ANCHORS[currentDriftImage] || IMAGE_ANCHORS['drift.png'];
+    // convert from image space to car-local space centered at the image middle
+    wheelLocalLeft.x  = (meta.rearLeft.x  - 0.5) * carWidthPx;
+    wheelLocalLeft.y  = (meta.rearLeft.y  - 0.5) * carHeightPx;
+    wheelLocalRight.x = (meta.rearRight.x - 0.5) * carWidthPx;
+    wheelLocalRight.y = (meta.rearRight.y - 0.5) * carHeightPx;
   }
 
   function resizeAllCanvases() {
@@ -1040,7 +883,7 @@
   let maxParticles = BASE_MAX;
   
   // Limit smoke particles specifically to prevent screen clutter
-  const MAX_SMOKE_PARTICLES = Math.floor(maxParticles * 0.4); // Max 40% of particles can be smoke
+  const MAX_SMOKE_PARTICLES = Math.floor(maxParticles * 0.6); // Max 60% of particles can be smoke (increased from 40%)
   
   // Adaptive particle density based on performance
   function adjustParticleDensity() {
@@ -1071,11 +914,25 @@
       const smokeCount = activeParticles.filter(part => part.active && part.render === renderSmoke).length;
       if (smokeCount >= MAX_SMOKE_PARTICLES) {
         particlePool.push(p); // Return to pool if limit is reached
+        // Debug: Log when smoke limit is reached
+        if (Math.random() < 0.1) { // 10% chance to log
+          console.log('Smoke particle limit reached:', smokeCount, '>=', MAX_SMOKE_PARTICLES);
+        }
         return;
       }
     }
     
     activeParticles.push(p);
+    
+    // Debug: Log smoke particle creation
+    if (props.render === renderSmoke && Math.random() < 0.05) { // 5% chance to log
+      console.log('Smoke particle added:', {
+        x: props.x,
+        y: props.y,
+        size: props.size,
+        life: props.life
+      });
+    }
   }
 
   function chooseToken(){
@@ -1233,9 +1090,9 @@
 
   const car = {
     x:0, y:0, theta:-0.4, u:360, v:0, rYaw:0,
-    a:70, b:70, invM:1/1400, invIz:1/50000, CfBase:18000, CrBase:12000, steerMax:0.75,
+    a:70, b:70, invM:1/1800, invIz:1/90000, CfBase:18000, CrBase:12000, steerMax:0.75,
     mu:1.15, Cf:18000, Cr:10200, side:1, targetBeta:0.8, targetSpeed:500,
-    nextSwitch:0, nextEbrake:0, ebrakeUntil:0
+    nextSwitch:0, nextEbrake:0, ebrakeUntil:0, bodyRoll: 0
   };
   function clamp(t, lo, hi){ return t<lo?lo:(t>hi?hi:t); }
   function norm(a){ while(a>Math.PI) a-=Math.PI*2; while(a<-Math.PI) a+=Math.PI*2; return a; }
@@ -1243,14 +1100,9 @@
   function selectRandomDriftImage() {
     const useDrift2 = Math.random() < 0.5;
     currentDriftImage = useDrift2 ? 'drift2.png' : 'drift.png';
-    driftImageSide = useDrift2 ? 'left' : 'right';
-    
-    // Update the drifter image source
-    if (drifter) {
-      drifter.src = currentDriftImage;
-    }
-    
-    console.log(`Selected drift image: ${currentDriftImage} (smoke from ${driftImageSide})`);
+    const meta = IMAGE_ANCHORS[currentDriftImage] || { smokeFrom: 'right' };
+    driftImageSide = meta.smokeFrom;     // 'left' or 'right'
+    if (drifter) drifter.src = currentDriftImage;
   }
 
   function initCar(ts){
@@ -1301,6 +1153,12 @@
     car.u += dt*(ax + car.rYaw*car.v + (-Fyf*Math.sin(delta))*car.invM);
     car.v += dt*((Fyr + Fyf*Math.cos(delta))*car.invM - car.rYaw*car.u);
     car.rYaw += dt*((car.a*Fyf*Math.cos(delta) - car.b*Fyr)*car.invIz);
+    
+    // Body Roll Simulation
+    const lateralForce = Fyr + Fyf * Math.cos(delta);
+    const targetRoll = -clamp(lateralForce * 0.000005, -0.15, 0.15);
+    car.bodyRoll += (targetRoll - car.bodyRoll) * dt * 8;
+
 
     const ct = Math.cos(car.theta), st = Math.sin(car.theta);
     const wx = car.u*ct - car.v*st, wy = car.u*st + car.v*ct;
@@ -1316,7 +1174,7 @@
       wallHit = true;
     }
     if(car.y < m || car.y > viewH - m){
-      car.y = Math.max(m, Math.min(viewH - m, car.y));
+      car.y = Math.max(m, Math.min(viewW - m, car.y));
       const ny = car.y < viewH*0.5 ? 1 : -1;
       const rwx = wx, rwy = -wy*0.6;
       car.u = rwx*ct + rwy*st; car.v = -rwx*st + rwy*ct; car.rYaw -= 0.8*ny;
@@ -1327,22 +1185,22 @@
     // Smoke and Tire Marks
     if(!prefersReduced){
       const slip = Math.abs(ar);
-      if(slip > 0.35 || ts < car.ebrakeUntil){
-        // Tire mark points
-        const rearAxleOffset = -carWidthPx * 0.45;
-        const tireOffset = carWidthPx * 0.3;
-        const localLeft = { x: rearAxleOffset, y: -tireOffset };
-        const localRight = { x: rearAxleOffset, y: tireOffset };
+      // Lower threshold for more consistent smoke generation
+      if(slip > 0.25 || ts < car.ebrakeUntil){
+        // Tire mark points from calibrated wheel centers
+        const ct = Math.cos(car.theta), st = Math.sin(car.theta);
 
-        const worldLeft = {
-          x: car.x + localLeft.x * ct - localLeft.y * st,
-          y: car.y + localLeft.x * st + localLeft.y * ct
-        };
-        const worldRight = {
-          x: car.x + localRight.x * ct - localRight.y * st,
-          y: car.y + localRight.x * st + localRight.y * ct
-        };
+        // local to world helper
+        function toWorld(local){
+          return {
+            x: car.x + local.x * ct - local.y * st,
+            y: car.y + local.x * st + local.y * ct
+          };
+        }
+        const worldLeft  = toWorld(wheelLocalLeft);
+        const worldRight = toWorld(wheelLocalRight);
 
+        // Tire marks
         if (lastTirePoints.left) {
           tireMarkCtx.strokeStyle = 'rgba(255,255,255,0.04)';
           tireMarkCtx.lineWidth = 2;
@@ -1358,42 +1216,64 @@
         }
         lastTirePoints.left = worldLeft;
         lastTirePoints.right = worldRight;
-
+        
         // Smoke
-        const strong = slip > 0.6;
-        const veryStrong = slip > 0.8;
-        const baseCount = strong ? (veryStrong ? 2 : 1) : 1;
-        const count = Math.floor(baseCount * quality.density);
-        const smokeOrigin = driftImageSide === 'right' ? worldRight : worldLeft;
+        const strong = slip > 0.5; // Lowered from 0.6
+        const veryStrong = slip > 0.7; // Lowered from 0.8
+        const baseCount = strong ? (veryStrong ? 3 : 2) : 1; // Increased base counts
+        const count = Math.max(1, Math.floor(baseCount * quality.density)); // Ensure at least 1 particle
         
         const rearAxleVelX = wx - st * car.b * car.rYaw;
         const rearAxleVelY = wy + ct * car.b * car.rYaw;
         
+        // 25% bigger than before and proportional to car width
+        const smokeSizeBase = carWidthPx * 0.065;
+
+        // choose calibrated wheel for this image
+        const smokeOrigin = (driftImageSide === 'right') ? worldRight : worldLeft;
+
+        // Debug smoke generation (only log occasionally to avoid spam)
+        if (Math.random() < 0.01) { // 1% chance to log
+          console.log('Smoke generation:', {
+            slip: slip.toFixed(3),
+            count: count,
+            quality: quality.density,
+            ebrake: ts < car.ebrakeUntil,
+            smokeOrigin: smokeOrigin,
+            driftImage: currentDriftImage,
+            side: driftImageSide
+          });
+        }
+        
+        // Visual debug: Show slip indicator on screen
+        if (slip > 0.2) { // Show indicator when approaching smoke threshold
+          mainCtx.save();
+          mainCtx.fillStyle = `rgba(255, ${slip > 0.25 ? '255' : '128'}, 0, 0.6)`;
+          mainCtx.font = '12px monospace';
+          mainCtx.fillText(`Slip: ${slip.toFixed(2)}`, 10, 30);
+          mainCtx.restore();
+        }
+
         for (let i = 0; i < count; i++) {
           const spriteIndex = Math.floor(Math.random() * smokeSprites.length);
-          const baseSize = strong ? (veryStrong ? rand(24, 38) : rand(20, 30)) : rand(16, 24);
-          const baseSmokeVx = -rearAxleVelX;
-          const baseSmokeVy = -rearAxleVelY;
-          const speedScale = rand(0.1, 0.3);
+          const baseSize = smokeSizeBase * (veryStrong ? 1.3 : strong ? 1.05 : 0.85);
+          const baseSmokeVx = -rearAxleVelX, baseSmokeVy = -rearAxleVelY;
+          const speedScale = rand(0.12, 0.28);
           const angle = rand(-0.5, 0.5);
           const c = Math.cos(angle), s = Math.sin(angle);
           const vx = (baseSmokeVx * c - baseSmokeVy * s) * speedScale;
           const vy = (baseSmokeVx * s + baseSmokeVy * c) * speedScale;
-          
+
           addParticle({
             x: smokeOrigin.x, y: smokeOrigin.y,
             vx, vy,
-            size: baseSize, life: rand(1.4, 2.2), opacity: rand(0.3, 0.6),
+            size: baseSize, life: rand(1.4, 2.2), opacity: rand(0.35, 0.6),
             rot: rand(0, Math.PI*2), vrot: rand(-1.5, 1.5),
-            spriteIndex: spriteIndex,
-            initialSize: baseSize,
-            update: function(p, dt) {
-              const airResistance = 0.98;
-              const buoyancy = -10;
-              p.vx *= airResistance;
-              p.vy = (p.vy + buoyancy * dt) * airResistance;
-              p.x += p.vx * dt;
-              p.y += p.vy * dt;
+            spriteIndex, initialSize: baseSize,
+            update: function(p, dt){
+              const air = 0.985, buoy = -10;
+              p.vx *= air; p.vy = (p.vy + buoy * dt) * air;
+              p.x += p.vx * dt; p.y += p.vy * dt;
               p.rot += p.vrot * dt;
               p.life -= dt * 0.8;
               p.opacity = p.life * 0.7;
@@ -1424,7 +1304,7 @@
       }
     }
 
-    drifter.style.transform = `translate(${car.x - carWidthPx/2}px, ${car.y - carHeightPx/2}px) rotate(${car.theta}rad)`;
+    drifter.style.transform = `translate(${car.x - carWidthPx/2}px, ${car.y - carHeightPx/2 + car.bodyRoll * 10}px) rotate(${car.theta + car.bodyRoll * 0.2}rad)`;
   }
 
   let emaDt = 1/60;
@@ -1567,7 +1447,7 @@
           setTimeout(()=>confettiColumns(), 520);
           
           lastTime = performance.now();
-          announce('التحكم: Enter أو مسافة للتأثير. P إيقاف/استئناف. M كتم. R إعادة تعيين. I تبديل الصورة.');
+          announce('التحكم: Enter أو مسافة للتأثير. P إيقاف/استئناف. M كتم. R إعادة تعيين. I تبديل الصورة. S اختبار الدخان.');
           requestAnimationFrame(mainLoop);
           play.focus();
         }, 50); // Short delay to ensure display:block is registered before transition
@@ -1731,6 +1611,38 @@
       // Manual image switch for testing
       selectRandomDriftImage();
       announce(`Switched to ${currentDriftImage} (smoke from ${driftImageSide})`);
+      createInteractionFeedback();
+      e.preventDefault();
+    } else if(k==='s'){
+      // Manual smoke test
+      const testX = car.x + Math.cos(car.theta) * 50;
+      const testY = car.y + Math.sin(car.theta) * 50;
+      
+      // Force add some smoke particles for testing
+      for (let i = 0; i < 5; i++) {
+        addParticle({
+          x: testX + Math.random() * 20 - 10,
+          y: testY + Math.random() * 20 - 10,
+          vx: (Math.random() - 0.5) * 50,
+          vy: (Math.random() - 0.5) * 50,
+          size: 40, life: 2.0, opacity: 0.6,
+          rot: Math.random() * Math.PI * 2, vrot: (Math.random() - 0.5) * 3,
+          spriteIndex: Math.floor(Math.random() * smokeSprites.length),
+          initialSize: 40,
+          update: function(p, dt){
+            const air = 0.985, buoy = -10;
+            p.vx *= air; p.vy = (p.vy + buoy * dt) * air;
+            p.x += p.vx * dt; p.y += p.vy * dt;
+            p.rot += p.vrot * dt;
+            p.life -= dt * 0.8;
+            p.opacity = p.life * 0.7;
+            p.scale = 1 + (1 - p.life) * 1.2;
+            p.size = p.initialSize * p.scale;
+          },
+          render: renderSmoke
+        });
+      }
+      announce('Manual smoke test triggered');
       createInteractionFeedback();
       e.preventDefault();
     }
